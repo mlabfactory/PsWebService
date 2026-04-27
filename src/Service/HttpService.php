@@ -41,7 +41,13 @@ class HttpService implements HttpServiceInterface {
         try {
             $config = $this->config;
             $stream = new Client($config->toArray());
-            $response = $stream->request($method, $this->api, );
+            $options = [];
+
+            if ($data !== []) {
+                $options['json'] = $data;
+            }
+
+            $response = $stream->request($method, $this->api, $options);
             $this->response = $response;
             $this->httpCode = $response->getStatusCode();
             return $this;

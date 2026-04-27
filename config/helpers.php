@@ -1,4 +1,6 @@
 <?php
+
+use DolzeZampa\WS\Domain\ObjectInterface;
 /**
  * This file is a helper file that contains various functions.
  */
@@ -10,8 +12,12 @@ if(!function_exists('config')) {
 }
 
 if(!function_exists('response')) {
-    function response(array $dataResponse, int $statusCode = 200, array $headers=[]): \Psr\Http\Message\ResponseInterface {
+    function response(array|ObjectInterface $dataResponse, int $statusCode = 200, array $headers=[]): \Psr\Http\Message\ResponseInterface {
         $response = new \Slim\Psr7\Response();
+
+        if($dataResponse instanceof ObjectInterface) {
+            $dataResponse = $dataResponse->toArray();
+        }
 
         $jsonData = json_encode($dataResponse);
         if ($jsonData === false) {

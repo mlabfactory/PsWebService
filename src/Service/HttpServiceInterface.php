@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace DolzeZampa\WS\Service;
 
 use DolzeZampa\WS\Domain\Object\WebserviceConfig;
+use DolzeZampa\WS\Domain\ObjectInterface;
 use Slim\Http\Interfaces\ResponseInterface;
 
 interface HttpServiceInterface {
@@ -12,7 +13,7 @@ interface HttpServiceInterface {
 
     public function setUrl(string $url): void;
 
-    public function invoke(string $method, array $data = []): self;
+    public function invoke(string $method, array|ObjectInterface $data = []): self;
 
     public function response(): ResponseInterface;
 
