@@ -7,7 +7,6 @@ use DolzeZampa\WS\Http\Controller\Controller;
 use DolzeZampa\WS\Service\PS\Product;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Illuminate\Support\Facades\Cache;
 
 class PsProductController extends Controller
 {
