@@ -1,0 +1,65 @@
+<?php
+declare(strict_types=1);
+
+namespace DolzeZampa\WS\Domain\Entities;
+
+use DolzeZampa\WS\Domain\ObjectInterface;
+use DolzeZampa\WS\Service\PS\PrestashopServiceInterface;
+
+class StockAvailableEntity implements ObjectInterface
+{
+	/** @var array<string, mixed> */
+	private array $data;
+    private PrestashopServiceInterface $service;
+    
+    private function __construct(array $data, PrestashopServiceInterface $service)
+    {
+        $this->service = $service;
+        $this->data = $data;
+        $this->normalizeData();
+	}
+
+	public static function create(array $data, PrestashopServiceInterface $service): self
+	{
+		return new self($data, $service);
+	}
+
+	public function getId(): int
+	{
+		return (int) ($this->data['id'] ?? 0);
+	}
+
+	public function getIdProductAttribute(): int
+	{
+		return (int) ($this->data['id_product_attribute'] ?? 0);
+	}
+
+	public function getQuantity(): int
+	{
+		return (int) ($this->data['quantity'] ?? 0);
+	}
+
+	public function toArray(): array
+	{
+		return $this->data;
+	}
+
+	public function toJson($options = 0): string
+	{
+		return json_encode($this->toArray(), $options);
+	}
+
+	public function __get(string $name): mixed
+	{
+		if (!array_key_exists($name, $this->data)) {
+			throw new \InvalidArgumentException('No argument found with ' . $name);
+		}
+
+		return $this->data[$name];
+	}
+
+	public function normalizeData(): void
+	{
+		//
+	}
+}
