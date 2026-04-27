@@ -1,6 +1,6 @@
-# BudgetControl Ms template
+# Prestashop WebService
 
-This repository contains the code of microservice budgetcontrol template.
+This repository contains the code of microservice, to connect prestashop e-commerce from api
 
 ## Prerequisites
 
