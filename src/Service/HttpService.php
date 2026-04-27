@@ -8,6 +8,7 @@ use DolzeZampa\WS\Service\HttpServiceInterface;
 use GuzzleHttp\Client;
 use Psr\Http\Client\ClientExceptionInterface;
 use Slim\Http\Interfaces\ResponseInterface;
+use DolzeZampa\WS\Domain\ObjectInterface;
 
 class HttpService implements HttpServiceInterface {
 
@@ -32,7 +33,11 @@ class HttpService implements HttpServiceInterface {
      *
      * @return self
      */
-    public function invoke(string $method, array $data = []): self {
+    public function invoke(string $method, array|ObjectInterface $data = []): self {
+        if($data instanceof ObjectInterface) {
+            $data = $data->toArray();
+        }
+
         try {
             $config = $this->config;
             $stream = new Client($config->toArray());
