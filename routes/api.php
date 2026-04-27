@@ -3,6 +3,7 @@
  *  application apps
  */
 
+$app->get('/categories', DolzeZampa\WS\Http\Controller\CategoryController::class . ':categoryList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
 $app->get('/product-list', DolzeZampa\WS\Http\Controller\PsProductController::class . ':productList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
 $app->get('/product-featured', DolzeZampa\WS\Http\Controller\PsProductController::class . ':featuredProducts')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
 $app->get('/product-by-category', DolzeZampa\WS\Http\Controller\PsProductController::class . ':productByCategory')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
