@@ -56,9 +56,17 @@ class OrderEntity implements ObjectInterface
 
 	public function normalizeData(): void
 	{
+		$customer = CustomerEntity::create($this->data['order']['customer'], $this->service);
 		$this->data = [
-			'id' => (int) ($this->data['id'] ?? 0),
-			'name' => (string) ($this->data['name'] ?? ''),
+			'id' => (int) $this->data['id'],
+			'reference' => (string) $this->data['reference'],
+			'id_cart' => (int) $this->data['id_cart'],
+			'current_state' => (int) $this->data['current_state'],
+			'date_add' => (string) $this->data['date_add'],
+			'total_paid_tax_incl' => (float) $this->data['total_paid_tax_incl'],
+			'total_paid_tax_excl' => (float) $this->data['total_paid_tax_excl'],
+			'customer' => $customer->toArray(),
+			'id_lang' => (int) $this->data['id_lang'],
 		];
 	}
 }

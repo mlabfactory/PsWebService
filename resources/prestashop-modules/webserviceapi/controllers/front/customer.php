@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__) . '/../../classes/MlabFactoryApiBaseModuleFrontController.php';
 
-class MlabFactoryApiCustomerModuleFrontController extends MlabFactoryApiBaseModuleFrontController
+class webserviceapicustomerModuleFrontController extends MlabFactoryApiBaseModuleFrontController
 {
     protected function handleRequest()
     {
@@ -14,12 +14,12 @@ class MlabFactoryApiCustomerModuleFrontController extends MlabFactoryApiBaseModu
 
         $addresses = array();
         if (!empty($payload['delivery_address']) && is_array($payload['delivery_address'])) {
-            $deliveryAddress = MlabFactoryApiHelper::ensureAddressForCustomer($customer, $payload['delivery_address'], 'API delivery');
+            $deliveryAddress = MlabFactoryApiHelper::ensureAddressForCustomer($customer, $payload['delivery_address']);
             $addresses['delivery'] = MlabFactoryApiHelper::serializeAddress($deliveryAddress);
         }
 
         if (!empty($payload['invoice_address']) && is_array($payload['invoice_address'])) {
-            $invoiceAddress = MlabFactoryApiHelper::ensureAddressForCustomer($customer, $payload['invoice_address'], 'API invoice');
+            $invoiceAddress = MlabFactoryApiHelper::ensureAddressForCustomer($customer, $payload['invoice_address']);
             $addresses['invoice'] = MlabFactoryApiHelper::serializeAddress($invoiceAddress);
         }
 

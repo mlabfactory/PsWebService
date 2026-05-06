@@ -9,7 +9,8 @@ $container->set(\DolzeZampa\WS\Service\HttpService::class, function ($c) {
         apiKey: env('PS_API_KEY'),
         domain: env('PS_BASE_URL'),
         headers: [
-            "Output-Format" => "JSON",
+            "Output-Format" => "JSON"
+
         ]
     );
     return new \DolzeZampa\WS\Service\HttpService($webserviceCOnfig);
@@ -35,6 +36,21 @@ $container->set(\DolzeZampa\WS\Service\PS\Category::class, function ($c) {
     return new \DolzeZampa\WS\Service\PS\Category($httpService);
 });
 
+$container->set(\DolzeZampa\WS\Service\PS\Cart::class, function ($c) {
+    $httpService = $c->get(\DolzeZampa\WS\Service\HttpService::class);
+    return new \DolzeZampa\WS\Service\PS\Cart($httpService);
+});
+
+$container->set(\DolzeZampa\WS\Service\PS\Order::class, function ($c) {
+    $httpService = $c->get(\DolzeZampa\WS\Service\HttpService::class);
+    return new \DolzeZampa\WS\Service\PS\Order($httpService);
+});
+
+$container->set(\DolzeZampa\WS\Service\PS\Carrier::class, function ($c) {
+    $httpService = $c->get(\DolzeZampa\WS\Service\HttpService::class);
+    return new \DolzeZampa\WS\Service\PS\Carrier($httpService);
+});
+
 /** CONTROLLERS */
 $container->set(\DolzeZampa\WS\Http\Controller\PsProductController::class, function ($c) {
     $productService = $c->get(\DolzeZampa\WS\Service\PS\Product::class);
@@ -49,4 +65,19 @@ $container->set(\DolzeZampa\WS\Http\Controller\CategoryController::class, functi
 $container->set(\DolzeZampa\WS\Http\Controller\CustomerController::class, function ($c) {
     $customerService = $c->get(\DolzeZampa\WS\Service\PS\Customer::class);
     return new \DolzeZampa\WS\Http\Controller\CustomerController($customerService);
+});
+
+$container->set(\DolzeZampa\WS\Http\Controller\OrderController::class, function ($c) {
+    $orderService = $c->get(\DolzeZampa\WS\Service\PS\Order::class);
+    return new \DolzeZampa\WS\Http\Controller\OrderController($orderService);
+});
+
+
+$container->set(\DolzeZampa\WS\Service\Payments\PaymentService::class, function ($c) {
+    return new \DolzeZampa\WS\Service\Payments\PaymentService();
+});
+
+$container->set(\DolzeZampa\WS\Http\Controller\CarrierController::class, function ($c) {
+    $currierService = $c->get(\DolzeZampa\WS\Service\PS\Carrier::class);
+    return new \DolzeZampa\WS\Http\Controller\CarrierController($currierService);
 });

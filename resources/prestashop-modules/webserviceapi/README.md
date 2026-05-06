@@ -134,3 +134,8 @@ Dal pannello del modulo è possibile configurare:
 - L'endpoint `GET /api/orders` richiede `id_order` oppure `reference`.
 - Per finalizzare un ordine serve un carrello con prodotti, cliente valido e indirizzi di consegna/fatturazione impostati.
 - Se un carrello non virtuale non ha un vettore, l'endpoint ordine risponde con errore `422`.
+
+ Backend Return URLs:
+
+success_url: /checkout/success?session_id={CHECKOUT_SESSION_ID}&cart_id=227
+cancel_url: /checkout/cancel?cart_id=227

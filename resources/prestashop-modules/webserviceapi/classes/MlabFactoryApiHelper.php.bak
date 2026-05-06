@@ -325,63 +325,22 @@ class MlabFactoryApiHelper
             throw new MlabFactoryApiException('Guest not found.', 404, array('id_guest' => (int) $cart->id_guest));
         }
 
-        // Get email from payload
+        // Check if customer wants to register (default false for guest checkout)
+        $shouldRegister = self::toBool(self::getValue($payload, 'create_account', false));
+        
+        // Get email from payload or guest
         $email = trim((string) self::getValue($payload, 'email', ''));
         if (empty($email)) {
             throw new MlabFactoryApiException('Email is required for guest checkout.', 422);
         }
 
-        // Check if customer already exists with this email
+        // Check if customer already exists
         $existingCustomerId = (int) Customer::customerExists($email, true);
-        
-        if ($existingCustomerId > 0) {
-            // Customer already exists - use existing customer
-            $existingCustomer = new Customer($existingCustomerId);
-            
-            if (!Validate::isLoadedObject($existingCustomer)) {
-                throw new MlabFactoryApiException('Customer found but cannot be loaded.', 500, array('id_customer' => $existingCustomerId));
-            }
-            
-            // If customer was a guest and wants to upgrade to registered, update it
-            $shouldRegister = self::toBool(self::getValue($payload, 'create_account', false));
-            if ($existingCustomer->is_guest && $shouldRegister) {
-                $existingCustomer->is_guest = 0;
-                $existingCustomer->active = 1;
-                $existingCustomer->id_default_group = (int) Configuration::get('PS_CUSTOMER_GROUP');
-                
-                // Update password if provided
-                $plainPassword = trim((string) self::getValue($payload, 'password', ''));
-                if (!empty($plainPassword)) {
-                    $existingCustomer->passwd = Tools::encrypt($plainPassword);
-                } else {
-                    $plainPassword = Tools::passwdGen(8);
-                    $existingCustomer->passwd = Tools::encrypt($plainPassword);
-                }
-                
-                if ($existingCustomer->update()) {
-                    // Send welcome email for the upgrade
-                    Mail::Send(
-                        (int) Configuration::get('PS_LANG_DEFAULT'),
-                        'account',
-                        Mail::l('Welcome!'),
-                        array(
-                            '{firstname}' => $existingCustomer->firstname,
-                            '{lastname}' => $existingCustomer->lastname,
-                            '{email}' => $existingCustomer->email,
-                            '{passwd}' => $plainPassword
-                        ),
-                        $existingCustomer->email,
-                        $existingCustomer->firstname . ' ' . $existingCustomer->lastname
-                    );
-                }
-            }
-            
-            return $existingCustomer;
+        if ($existingCustomerId > 0 && $shouldRegister) {
+            // Customer already exists, just return it
+            return new Customer($existingCustomerId);
         }
 
-        // Customer doesn't exist - create new one
-        $shouldRegister = self::toBool(self::getValue($payload, 'create_account', false));
-        
         if (!$shouldRegister) {
             // Guest checkout - create temporary customer
             $customer = new Customer();
@@ -393,7 +352,10 @@ class MlabFactoryApiHelper
             $customer->id_default_group = (int) Configuration::get('PS_GUEST_GROUP');
             
             if (!$customer->validateFields(false) || !$customer->add()) {
-                throw new MlabFactoryApiException('Unable to create guest customer.', 500);
+                $errorInfo = $customer->getErrors();
+                throw new MlabFactoryApiException('Unable to create guest customer.', 500, array(
+                    'errors' => $errorInfo,
+                ));
             }
 
             return $customer;
@@ -404,18 +366,6 @@ class MlabFactoryApiHelper
         $customer->email = $email;
         $customer->firstname = trim((string) self::getValue($payload, 'firstname', 'Guest'));
         $customer->lastname = trim((string) self::getValue($payload, 'lastname', 'Customer'));
-
-        // SAVE DELIVERY ADDRESS FIRST TO GET ID FOR CUSTOMER VALIDATION
-        if (!empty($payload['delivery_address']) && is_array($payload['delivery_address'])) {
-            $deliveryAddress = self::ensureAddressForCustomer($customer, $payload['delivery_address']);
-            $customer->id_address_delivery = (int) $deliveryAddress->id;
-        }
-
-        // SAVE INVOICE ADDRESS FIRST TO GET ID FOR CUSTOMER VALIDATION
-        if (!empty($payload['invoice_address']) && is_array($payload['invoice_address'])) {
-            $invoiceAddress = self::ensureAddressForCustomer($customer, $payload['invoice_address']);
-            $customer->id_address_invoice = (int) $invoiceAddress->id;
-        }
         
         // Generate password if provided, otherwise random
         $plainPassword = trim((string) self::getValue($payload, 'password', ''));
@@ -455,8 +405,7 @@ class MlabFactoryApiHelper
         return $customer;
     }
 
-
-    public static function ensureAddressForCustomer(Customer $customer, array $data)
+    public static function ensureAddressForCustomer(Customer $customer, array $data, $alias)
     {
         if (!empty($data['id_address'])) {
             $address = new Address((int) $data['id_address']);
@@ -471,7 +420,7 @@ class MlabFactoryApiHelper
 
         $address = new Address();
         $address->id_customer = (int) $customer->id;
-        $address->alias = !empty($data['alias']) ? (string) $data['alias'] : 'home';
+        $address->alias = !empty($data['alias']) ? (string) $data['alias'] : $alias;
         $address->firstname = !empty($data['firstname']) ? (string) $data['firstname'] : (string) $customer->firstname;
         $address->lastname = !empty($data['lastname']) ? (string) $data['lastname'] : (string) $customer->lastname;
         $address->company = (string) self::getValue($data, 'company', '');

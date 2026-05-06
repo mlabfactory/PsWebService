@@ -12,12 +12,12 @@ class Customer extends PrestashopService implements PrestashopServiceInterface
 {
     public function register(CustomerEntity $customer): HttpServiceInterface
     {
-        return $this->post('/api/register', $customer, 'register', $customer->toArray()['customer']['email'] ?? null);
+        return $this->post('/register', $customer, 'register', $customer->toArray()['customer']['email'] ?? null);
     }
 
     public function createCustomer(CustomerEntity $customer): HttpServiceInterface
     {
-        return $this->post('/api/customers', $customer, 'create', $customer->toArray()['customer']['email'] ?? null);
+        return $this->post('/customers', $customer, 'create', $customer->toArray()['customer']['email'] ?? null);
     }
 
     /**
@@ -25,7 +25,7 @@ class Customer extends PrestashopService implements PrestashopServiceInterface
      */
     public function login(array $credentials): HttpServiceInterface
     {
-        return $this->post('/api/login', $credentials, 'login', $credentials['email'] ?? null);
+        return $this->post('/login', $credentials, 'login', $credentials['email'] ?? null);
     }
 
     /**

@@ -25,5 +25,7 @@ interface HttpServiceInterface {
 
     public function failed(): bool;
 
-    public function onError(callable $callback): void;
+    public function onError(callable $callback): void;  
+
+    public function getConfig(): WebserviceConfig;
 }

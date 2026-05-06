@@ -43,7 +43,6 @@ class PrestashopService implements PrestashopServiceInterface {
             Log::error("Exception occurred while retrieving image for product {$productId} with image ID {$imageId} and type {$type->value}: " . $e->getMessage());
             return null;
         }
-
         return ImageEntity::create($response->toArray(), $this);
     }
 

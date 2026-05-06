@@ -54,7 +54,7 @@ class CartEntity implements ObjectInterface
 	public function toArray(): array
 	{
 		return $this->data;
-	}
+	}    
 
 	public function toJson($options = 0): string
 	{
@@ -74,7 +74,7 @@ class CartEntity implements ObjectInterface
 	{
 		$this->data = [
 			'id' => (int) ($this->data['id'] ?? 0),
-			'name' => (string) ($this->data['name'] ?? ''),
+			'products' => (array) ($this->data['products'] ?? []),
 		];
 	}
 }

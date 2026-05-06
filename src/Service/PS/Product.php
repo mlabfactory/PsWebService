@@ -56,7 +56,7 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
          */
         public function getProductByCategory(int $categoryId): Collection {
 
-        $products = $this->productsList(['display' => 'full','sort' => 'id_DESC', 'limit' => 12, 'filter[id_category_default]' => $categoryId]);
+        $products = $this->productsList(['display' => 'full','sort' => 'id_DESC', 'limit' => 12, 'filter[id_category_default]' => $categoryId, 'filter[active]' => 1]);
         return $products;
     }
 

@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__) . '/../../classes/MlabFactoryApiBaseModuleFrontController.php';
 
-class MlabFactoryApiOrderModuleFrontController extends MlabFactoryApiBaseModuleFrontController
+class webserviceapiorderModuleFrontController extends MlabFactoryApiBaseModuleFrontController
 {
     protected function handleRequest()
     {
@@ -24,15 +24,24 @@ class MlabFactoryApiOrderModuleFrontController extends MlabFactoryApiBaseModuleF
             throw new MlabFactoryApiException('Cart is empty.', 422, array('id_cart' => (int) $cart->id));
         }
 
-        $customer = MlabFactoryApiHelper::ensureCustomerExists((int) $cart->id_customer);
+        // Determine if this is a guest or registered customer
+        $isGuest = (int) $cart->id_customer === 0 && (int) $cart->id_guest > 0;
+        
+        if ($isGuest) {
+            // Guest checkout - create temporary customer from guest and cart data
+            $customer = MlabFactoryApiHelper::createCustomerFromGuest($cart, $payload);
+        } else {
+            // Registered customer
+            $customer = MlabFactoryApiHelper::ensureCustomerExists((int) $cart->id_customer);
+        }
 
         if (!empty($payload['delivery_address']) && is_array($payload['delivery_address'])) {
-            $deliveryAddress = MlabFactoryApiHelper::ensureAddressForCustomer($customer, $payload['delivery_address'], 'API delivery');
+            $deliveryAddress = MlabFactoryApiHelper::ensureAddressForCustomer($customer, $payload['delivery_address']);
             $cart->id_address_delivery = (int) $deliveryAddress->id;
         }
 
         if (!empty($payload['invoice_address']) && is_array($payload['invoice_address'])) {
-            $invoiceAddress = MlabFactoryApiHelper::ensureAddressForCustomer($customer, $payload['invoice_address'], 'API invoice');
+            $invoiceAddress = MlabFactoryApiHelper::ensureAddressForCustomer($customer, $payload['invoice_address']);
             $cart->id_address_invoice = (int) $invoiceAddress->id;
         }
 
@@ -45,14 +54,19 @@ class MlabFactoryApiOrderModuleFrontController extends MlabFactoryApiBaseModuleF
             $cart->id_carrier = $carrierId;
             $cart->setDeliveryOption(array((int) $cart->id_address_delivery => $carrierId . ','));
         }
+        
+        // Update cart with customer if it was a guest
+        if ($isGuest) {
+            $cart->id_customer = (int) $customer->id;
+        }
 
         if (!$cart->update()) {
             throw new MlabFactoryApiException('Unable to update cart before order creation.', 500);
         }
 
-        $paymentModuleName = (string) MlabFactoryApiHelper::getValue($payload, 'payment_module', Configuration::get(MlabFactoryApi::CONFIG_PAYMENT_MODULE));
+        $paymentModuleName = (string) MlabFactoryApiHelper::getValue($payload, 'payment_module', Configuration::get(webserviceapi::CONFIG_PAYMENT_MODULE));
         $paymentModule = MlabFactoryApiHelper::resolvePaymentModule($paymentModuleName);
-        $orderStateId = (int) MlabFactoryApiHelper::getValue($payload, 'id_order_state', Configuration::get(MlabFactoryApi::CONFIG_ORDER_STATE));
+        $orderStateId = (int) MlabFactoryApiHelper::getValue($payload, 'id_order_state', Configuration::get(webserviceapi::CONFIG_ORDER_STATE));
         $paymentLabel = (string) MlabFactoryApiHelper::getValue($payload, 'payment_label', $paymentModule->displayName);
         $amountPaid = (float) MlabFactoryApiHelper::getValue($payload, 'amount_paid', $cart->getOrderTotal(true, Cart::BOTH));
 
@@ -66,7 +80,13 @@ class MlabFactoryApiOrderModuleFrontController extends MlabFactoryApiBaseModuleF
             : (int) Configuration::get('PS_COUNTRY_DEFAULT');
         $this->context->country = new Country($countryId);
 
-        $existingOrderId = (int) Order::getOrderByCartId((int) $cart->id);
+        // Check if order already exists for this cart
+        $existingOrderId = (int) Db::getInstance()->getValue(
+            'SELECT `id_order`
+            FROM `' . _DB_PREFIX_ . 'orders`
+            WHERE `id_cart` = ' . (int) $cart->id
+        );
+        
         if ($existingOrderId > 0) {
             $order = new Order($existingOrderId);
 
@@ -98,6 +118,7 @@ class MlabFactoryApiOrderModuleFrontController extends MlabFactoryApiBaseModuleF
             'message' => 'Order finalized successfully.',
             'order' => MlabFactoryApiHelper::serializeOrder($order),
             'cart' => MlabFactoryApiHelper::serializeCart($cart),
+            'guest_registered' => $isGuest,
         );
     }
 

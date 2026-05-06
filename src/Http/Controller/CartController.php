@@ -31,15 +31,40 @@ class CartController extends Controller {
 
     public function getCart(Request $request, Response $response, array $argv): Response
     {
-        $customerId = (int) $argv['customerId'];
-        $cartList = $this->cartService->getCartListFromUserId($customerId);
+        $cartId = (int) $argv['cartId'];
+        $customerId = (int) $argv['customerId'] ?? null;
+        $guestId = (int) $request->getQueryParams()['guest_id'] ?? null;
+
+        $cart = $this->cartService->getCartFromId($cartId, $customerId, $guestId);
         
-        if(is_null($cartList)) {
+        if(is_null($cart)) {
             return response([], 404);
         }
 
-        return response($cartList);
+        return response($cart->toArray());
 
+    }
+
+    public function addToCart(Request $request, Response $response, array $argv): Response
+    {
+        $payload = $request->getParsedBody();
+        $customerId = (int) $argv['customerId'];
+        $isGuest = $request->getQueryParams()['is_guest'] ?? false;
+
+        if (!is_array($payload)) {
+            throw new \InvalidArgumentException('Invalid payload format', 400);
+        }
+
+        //find customerId from cookie session
+        $cart = $this->cartService->updateCart($payload, $customerId, $isGuest);
+        
+        if($cart->failed()) {
+            return response([
+                "error" => "Failed to create cart",
+            ], 500);
+        }
+
+        return response($cart->toArray(), 201);
     }
 
     public function createCart(Request $request, Response $response, array $argv): Response
@@ -50,12 +75,14 @@ class CartController extends Controller {
             throw new \InvalidArgumentException('Invalid payload format', 400);
         }
 
-        $this->validateCartPayload($payload);
-        
-        $cart = $this->cartService->newCart($payload);
+        //find customerId from cookie session
+        $customerId = $request->getCookieParams()['customer_id'] ?? null;
+        $cart = $this->cartService->newCart($payload, $customerId);
         
         if($cart->failed()) {
-            return response([], 500);
+            return response([
+                "error" => "Failed to create cart",
+            ], 500);
         }
 
         return response($cart->toArray(), 201);

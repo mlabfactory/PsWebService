@@ -42,10 +42,10 @@ final class WebserviceConfig implements ObjectInterface {
 
     public function __get(string $name): mixed 
     {
-        if(!isset($this->name)) {
+        if(!isset($this->$name)) {
             throw new InvalidArgumentException("No argument found with " . $name);
         }
-        return $this->name;
+        return $this->$name;
     }
 
     public function api(string $api): string
@@ -72,6 +72,12 @@ final class WebserviceConfig implements ObjectInterface {
             $data['apikey'],
             $data['base_uri']
         );
+    }
+
+    public function addQueryParams(array $params): void
+    {
+        $queryString = http_build_query($params);
+        $this->api .= '&' . $queryString;
     }
 
     public function normalizeData(): void

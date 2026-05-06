@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace DolzeZampa\WS\Http\Controller;
 
-use DolzeZampa\WS\Domain\Entities\CartEntity;
+use DolzeZampa\WS\Domain\Entities\CustomerEntity;
+use DolzeZampa\WS\Domain\Object\ConfirmOrderSession;
+use DolzeZampa\WS\Service\PS\Order;
+use PaymentGatewayInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use DolzeZampa\WS\Service\PS\Order;
 
 class OrderController extends CartController {
 
@@ -43,7 +45,7 @@ class OrderController extends CartController {
 
     }
 
-    public function createOrder(Request $request, Response $response, array $argv): Response
+    public function confirmOrder(Request $request, Response $response, array $argv): Response
     {
         $payload = $request->getParsedBody();
 
@@ -51,15 +53,146 @@ class OrderController extends CartController {
             throw new \InvalidArgumentException('Invalid payload format', 400);
         }
 
-        $this->validateCartPayload($payload);
+        try {
+            $confirmSession = ConfirmOrderSession::create($payload, $this->orderService);
+            $confirmSession->setCustomer(
+                CustomerEntity::create([
+                    'email' => $payload['customer']['email'],
+                    'firstname' => $payload['customer']['firstname'],
+                    'lastname' => $payload['customer']['lastname'],
+                    'newsletter' => $payload['customer']['newsletter'] ?? false,
+                    'delivery_address' => $payload['customer']['delivery_address']
+                ], $this->orderService)
+            );
+            
+            $errors = $confirmSession->validate();
+            if (!empty($errors)) {
+                return response([
+                    'success' => false,
+                    'errors' => $errors
+                ], 400);
+            }
+
+            $order = $this->orderService->confirmOrder($confirmSession);
+            
+            return response([
+                'success' => true,
+                'order' => $order->toArray()
+            ], 201);
+        } catch (\InvalidArgumentException $e) {
+            return response([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 400);
+        } catch (\Exception $e) {
+            return response([
+                'success' => false,
+                'error' => 'Failed to confirm order: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function createOrder(Request $request, Response $response, array $argv): Response
+    {
+        $payload = $request->getParsedBody();
+
+        if (!is_array($payload)) {
+            throw new \InvalidArgumentException('Invalid payload format', 400);
+        }
         
-        $cart = $this->orderService->newOrder(CartEntity::create($payload, $this->orderService));
-        
-        if($cart->failed()) {
-            return response([], 500);
+        $cart = $this->orderService->getCartFromId((int) $payload['id_cart'], (int) $payload['id_customer'] ?? null, (int) $payload['id_guest'] ?? null);
+        if(is_null($cart)) {
+            return response([], 404);
         }
 
-        return response($cart->toArray(), 201);
+        // Create payment session
+        try {
+            $paymentService = $this->initializePaymentService($payload['paymentMethod'] ?? 'stripe');
+            $orderSession = \DolzeZampa\WS\Domain\Object\OrderSession::create([
+                'success_url' => $_ENV['STRIPE_SUCCESS_URL'] ?? '',
+                'cancel_url' => $_ENV['STRIPE_CANCEL_URL'] ?? '',
+                'cart_id' => $payload['id_cart'],
+            ], $this->orderService);
+
+            //recuperiamo il correire scelto dal cliente per aggiungerlo alla sessione di pagamento
+            $carrierId = $payload['id_carrier'] ?? null;
+            if(is_null($carrierId)) {
+                throw new \InvalidArgumentException('Carrier ID is required for payment session');
+            }
+
+            $carrierDetails = $this->orderService->getCarrierDetail($carrierId);
+            if(is_null($carrierDetails)) {
+                throw new \InvalidArgumentException('Invalid carrier ID: ' . $carrierId);
+            }
+
+            $orderSession->addLineItem(
+                name: $carrierDetails->name,
+                quantity: 1,
+                price: (float) $carrierDetails->price_with_tax
+            );
+            
+            foreach ($cart->toArray()['products'] ?? [] as $product) {
+                $orderSession->addLineItem(
+                    name: $product['name'] ?? "Product #{$product['id_product']}",
+                    quantity: (int)$product['quantity'],
+                    price: (float)$product['price_wt']
+                );
+            }
+            
+            $checkoutUrl = $paymentService->createPaymentSession($orderSession);
+            
+            return response([
+                'order' => $cart->toArray(),
+                'payment_url' => $checkoutUrl
+            ], 201);
+        } catch (\Exception $e) {
+            return response([
+                'order' => $cart->toArray(),
+                'error' => $e->getMessage()
+            ], 201);
+        }
+    }
+
+    public function initiatePayment(Request $request, Response $response, array $argv): Response
+    {
+        $payload = $request->getParsedBody();
+
+        if (!is_array($payload)) {
+            throw new \InvalidArgumentException('Invalid payload format', 400);
+        }
+
+        try {
+            $paymentService = $this->initializePaymentService($payload['paymentMethod'] ?? 'stripe');
+            $orderSession = \DolzeZampa\WS\Domain\Object\OrderSession::create([
+                'success_url' => $payload['success_url'] ?? $_ENV['STRIPE_SUCCESS_URL'] ?? '',
+                'cancel_url' => $payload['cancel_url'] ?? $_ENV['STRIPE_CANCEL_URL'] ?? ''
+            ]);
+            
+            foreach ($payload['line_items'] ?? [] as $item) {
+                $orderSession->addLineItem(
+                    name: $item['name'],
+                    quantity: (int)$item['quantity'],
+                    price: (float)$item['price']
+                );
+            }
+            
+            $checkoutUrl = $paymentService->createPaymentSession($orderSession);
+            
+            return response(['url' => $checkoutUrl], 200);
+        } catch (\Exception $e) {
+            return response(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    private function initializePaymentService(string $paymentMethod): \DolzeZampa\WS\Service\Payments\PaymentGatewayInterface
+    {
+        switch ($paymentMethod) {
+            case 'stripe':
+                $apiKey = $_ENV['STRIPE_API_KEY'] ?? throw new \RuntimeException('STRIPE_API_KEY not configured');
+                return \DolzeZampa\WS\Service\Payments\PaymentService::setApiKey($apiKey);
+            default:
+                throw new \InvalidArgumentException('Unsupported payment method: ' . $paymentMethod);
+        }
     }
 
 }

@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__) . '/../../classes/MlabFactoryApiBaseModuleFrontController.php';
 
-class MlabFactoryApiLoginModuleFrontController extends MlabFactoryApiBaseModuleFrontController
+class webserviceapiloginModuleFrontController extends MlabFactoryApiBaseModuleFrontController
 {
     protected function handleRequest()
     {

@@ -66,6 +66,8 @@ class CustomerEntity implements ObjectInterface
         if (array_key_exists('newsletter', $this->data)) {
             $this->data['newsletter'] = (bool) $this->data['newsletter'];
         }
+
+        $this->data['invoice_address'] = $this->data['invoice_address'] ?? $this->data['delivery_address'] ?? null;
 	}
 
     /**
@@ -86,6 +88,12 @@ class CustomerEntity implements ObjectInterface
             $normalized['delivery_address'] = $this->normalizeDeliveryAddress($customer['delivery_address']);
         }
 
+        if (isset($customer['invoice_address']) && is_array($customer['invoice_address'])) {
+            $normalized['invoice_address'] = $this->normalizeDeliveryAddress($customer['invoice_address']);
+        } else {
+            $normalized['invoice_address'] = $normalized['delivery_address'] ?? null;
+        }
+
         return $normalized;
     }
 
@@ -96,11 +104,11 @@ class CustomerEntity implements ObjectInterface
     private function normalizeDeliveryAddress(array $deliveryAddress): array
     {
         return [
-            'alias' => (string) ($deliveryAddress['alias'] ?? ''),
-            'address1' => (string) ($deliveryAddress['address1'] ?? ''),
-            'city' => (string) ($deliveryAddress['city'] ?? ''),
-            'postcode' => (string) ($deliveryAddress['postcode'] ?? ''),
-            'id_country' => (int) ($deliveryAddress['id_country'] ?? 0),
+            'alias' => (string) ($deliveryAddress['alias'] ?? 'home'),
+            'address1' => (string) $deliveryAddress['address1'],
+            'city' => (string) $deliveryAddress['city'],
+            'postcode' => (string) $deliveryAddress['postcode'],
+            'id_country' => 10, //FIXME: Default country ID should be determined dynamically based on the delivery address details
             'phone_mobile' => (string) ($deliveryAddress['phone_mobile'] ?? ''),
         ];
     }

@@ -79,4 +79,21 @@ class PsProductController extends Controller
             'data' => $productDetail->toArray()
         ]);
     }
+
+    public function productsRelated(Request $request, Response $response, array $args)
+    {
+        $id = $args['id'] ?? null;
+        if (!$id) {
+            return response([
+                'success' => false,
+                'message' => 'Product ID is required'
+            ], 400);
+        }
+
+        // $relatedProducts = $this->productService->getRelatedProducts((int) $id);
+        return response([
+            'success' => true,
+            'data' => []
+        ]);
+    }
 }

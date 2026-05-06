@@ -148,7 +148,7 @@ abstract class MlabFactoryApiBaseModuleFrontController extends ModuleFrontContro
     {
         header('Content-Type: application/json; charset=utf-8');
         http_response_code((int) $statusCode);
-        die(Tools::jsonEncode($payload));
+        die(json_encode($payload));
     }
 
     protected function getCustomerContext(Customer $customer)

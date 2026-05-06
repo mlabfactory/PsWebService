@@ -25,7 +25,8 @@
         "bref/bref": "~2.4.1",
         "php-di/php-di": "^7.1",
         "guzzlehttp/guzzle": "^7.10",
-        "illuminate/cache": "^11.51"
+        "illuminate/cache": "^11.51",
+        "stripe/stripe-php": "^20.1"
     },
     "require-dev": {
         "nikic/php-parser": "^5.0",

@@ -69,31 +69,31 @@ class webserviceapi extends Module
         );
 
         return array(
-            'module-mlabfactoryapi-register' => array(
+            'module-webserviceapi-register' => array(
                 'rule' => 'api/register',
                 'keywords' => array(),
                 'controller' => 'register',
                 'params' => $params,
             ),
-            'module-mlabfactoryapi-login' => array(
+            'module-webserviceapi-login' => array(
                 'rule' => 'api/login',
                 'keywords' => array(),
                 'controller' => 'login',
                 'params' => $params,
             ),
-            'module-mlabfactoryapi-customer' => array(
+            'module-webserviceapi-customer' => array(
                 'rule' => 'api/customers',
                 'keywords' => array(),
                 'controller' => 'customer',
                 'params' => $params,
             ),
-            'module-mlabfactoryapi-cart' => array(
+            'module-webserviceapi-cart' => array(
                 'rule' => 'api/carts',
                 'keywords' => array(),
                 'controller' => 'cart',
                 'params' => $params,
             ),
-            'module-mlabfactoryapi-order' => array(
+            'module-webserviceapi-order' => array(
                 'rule' => 'api/orders',
                 'keywords' => array(),
                 'controller' => 'order',

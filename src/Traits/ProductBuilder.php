@@ -15,7 +15,7 @@ trait ProductBuilder {
      *
      * @return void
      */
-    protected function buildImageLink(array $imageTails): void
+    protected function buildImageLink(array $imageTails = []): void
     {
         $associations = $this->data['associations'];
         foreach ($associations['images'] as $index => $image) {
@@ -23,15 +23,19 @@ trait ProductBuilder {
                 throw new \InvalidArgumentException("Each image association must have an 'id' field");
             }
 
+            if(empty($imageTails)) {
+                $imageTails = ImageTail::cases(); // Use all available tails if none are specified
+            }
+
             /** @var ImageTail $tail */
             foreach ($imageTails as $tail) {
                 if(!$tail instanceof ImageTail) {
                     throw new \InvalidArgumentException("Image tails must be an array of ImageTail enum values");
                 }
-                $image =$this->service->getSpecificationsImage($this->getId(), (int) $image['id'], $tail);
+                $image = $this->service->getSpecificationsImage($this->getId(), (int) $image['id'], $tail);
 
                 if($image === null) {
-                    Log::warning("Image with id {$image['id']} for product {$this->getId()} could not be retrieved with tail {$tail->value}");
+                    Log::warning("Image with for product {$this->getId()} could not be retrieved with tail {$tail->value}");
                     continue; // Skip this tail if the image retrieval fails, but keep processing other tails
                 }
                 $this->data['associations']['images'][$index][$tail->value] = $image->toArray();
