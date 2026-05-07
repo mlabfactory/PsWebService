@@ -3,13 +3,12 @@ declare(strict_types=1);
 
 namespace PS\Webservice\Http\Controller;
 
-use PS\Webservice\Domain\Entities\CustomerEntity;
-use PS\Webservice\Domain\Object\ConfirmOrderSession;
 use PS\Webservice\Service\PS\Order;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class OrderController extends CartController {
+    private const ORDER_STATE_PAYMENT_ACCEPTED = 2;
 
     private Order $orderService;
 
@@ -49,44 +48,48 @@ class OrderController extends CartController {
         $payload = $request->getParsedBody();
 
         if (!is_array($payload)) {
-            throw new \InvalidArgumentException('Invalid payload format', 400);
+            return response([
+                'success' => false,
+                'error' => 'Invalid payload format'
+            ], 400);
+        }
+
+        $cartId = filter_var($payload['id_cart'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if ($cartId === false) {
+            return response([
+                'success' => false,
+                'error' => 'Valid cart ID is required'
+            ], 400);
         }
 
         try {
-            $confirmSession = ConfirmOrderSession::create($payload, $this->orderService);
-            $confirmSession->setCustomer(
-                CustomerEntity::create([
-                    'email' => $payload['customer']['email'],
-                    'firstname' => $payload['customer']['firstname'],
-                    'lastname' => $payload['customer']['lastname'],
-                    'newsletter' => $payload['customer']['newsletter'] ?? false,
-                    'delivery_address' => $payload['customer']['delivery_address']
-                ], $this->orderService)
-            );
-            
-            $errors = $confirmSession->validate();
-            if (!empty($errors)) {
+            $order = $this->orderService->getOrderByCartId($cartId);
+            if ($order === null) {
                 return response([
                     'success' => false,
-                    'errors' => $errors
-                ], 400);
+                    'status' => 'pending'
+                ], 202);
             }
 
-            $order = $this->orderService->confirmOrder($confirmSession);
-            
+            $orderData = $order->toArray();
+            if (!array_key_exists('current_state', $orderData)) {
+                return response([
+                    'success' => false,
+                    'error' => 'Invalid order state data'
+                ], 500);
+            }
+
+            $currentState = (int) $orderData['current_state'];
+            $isPaymentAccepted = $currentState === self::ORDER_STATE_PAYMENT_ACCEPTED;
+
             return response([
-                'success' => true,
-                'order' => $order->toArray()
-            ], 201);
-        } catch (\InvalidArgumentException $e) {
-            return response([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 400);
+                'success' => $isPaymentAccepted,
+                'order' => $orderData
+            ]);
         } catch (\Exception $e) {
             return response([
                 'success' => false,
-                'error' => 'Failed to confirm order: ' . $e->getMessage()
+                'error' => 'Failed to verify order: ' . $e->getMessage()
             ], 500);
         }
     }
