@@ -43,16 +43,31 @@ class OrderSession implements ObjectInterface
 
         $this->data = [
             'mode' => 'payment',
-            'success_url' => ($data['success_url'] ?? '') . ($cartId !== null ? '?cart_id=' . $cartId : ''),
-            'cancel_url' => ($data['cancel_url'] ?? '') . ($cartId !== null ? '?cart_id=' . $cartId : ''),
+            'success_url' => $this->appendQueryParam($data['success_url'] ?? '', 'cart_id', $cartId),
+            'cancel_url' => $this->appendQueryParam($data['cancel_url'] ?? '', 'cart_id', $cartId),
             'line_items' => $data['line_items'] ?? [],
+            // Metadata values for IDs: only non-empty strings are included.
+            // '0' is intentionally excluded as a valid ID since all PS IDs must be > 0.
             'metadata' => array_filter([
                 'cart_id' => isset($data['cart_id']) ? (string) $data['cart_id'] : null,
                 'id_customer' => isset($data['id_customer']) ? (string) $data['id_customer'] : null,
                 'id_guest' => isset($data['id_guest']) ? (string) $data['id_guest'] : null,
                 'id_carrier' => isset($data['id_carrier']) ? (string) $data['id_carrier'] : null,
-            ], fn($v) => $v !== null && $v !== ''),
+            ], fn($v) => $v !== null && $v !== '' && $v !== '0'),
         ];
+    }
+
+    /**
+     * Appends a query parameter to a URL, correctly handling existing query strings.
+     */
+    private function appendQueryParam(string $url, string $param, mixed $value): string
+    {
+        if ($value === null || $value === '') {
+            return $url;
+        }
+
+        $separator = str_contains($url, '?') ? '&' : '?';
+        return $url . $separator . urlencode($param) . '=' . urlencode((string) $value);
     }
 
     public function addLineItem(string $name, int $quantity, float $price): void

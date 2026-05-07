@@ -85,6 +85,8 @@ class StripeWebhookController extends Controller
         }
 
         $amountPaid = ($session->amount_total ?? 0) / 100;
+        // Note: this assumes a two-decimal currency (EUR). Zero-decimal currencies (e.g. JPY)
+        // would not need the /100 conversion. The current implementation is hardcoded to EUR.
         if ($amountPaid <= 0) {
             Log::error('Stripe webhook: missing or zero amount_total for session ' . $session->id);
             throw new \RuntimeException('Invalid amount_total in Stripe session ' . $session->id);
@@ -109,8 +111,8 @@ class StripeWebhookController extends Controller
         // not follow the Western "Firstname Lastname" format the full name is placed in
         // firstname and lastname is left empty.
         $fullName = trim($customerDetails->name ?? '');
-        if (str_contains($fullName, ' ')) {
-            $spacePos = strpos($fullName, ' ');
+        $spacePos = strpos($fullName, ' ');
+        if ($spacePos !== false) {
             $firstname = substr($fullName, 0, $spacePos);
             $lastname = trim(substr($fullName, $spacePos + 1));
         } else {
