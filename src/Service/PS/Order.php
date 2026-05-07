@@ -16,6 +16,27 @@ class Order extends Cart implements PrestashopServiceInterface {
         parent::__construct($httpService);
     }
 
+    public function getOrderByCartId(int $cartId): ?OrderEntity
+    {
+        $queryString = http_build_query([
+            'id_cart' => $cartId,
+            'ws_key' => $this->httpService->getConfig()->apikey
+        ]);
+        $this->httpService->setUrl("/orders?{$queryString}");
+
+        try {
+            $response = $this->httpService->invoke('GET');
+            $data = $response->toArray();
+            if ($response->failed() || empty($data['data'])) {
+                return null;
+            }
+            return OrderEntity::create($data['data'], $this);
+        } catch (\Exception $e) {
+            Log::error("Exception occurred while retrieving order for cart {$cartId}: " . $e->getMessage());
+            return null;
+        }
+    }
+
     public function getOrderListFromUserId(?int $customerId = null): ?OrderEntity
     {
         $queryString = http_build_query([
