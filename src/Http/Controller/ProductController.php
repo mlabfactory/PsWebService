@@ -9,7 +9,7 @@ use DolzeZampa\WS\Traits\PaginationTrait;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class PsProductController extends Controller
+class ProductController extends Controller
 {
     use PaginationTrait;
 
@@ -32,12 +32,12 @@ class PsProductController extends Controller
             'page' => $pagination['page']
         ]);
 
-        return response($this->paginatedResponse(
+        $response = $this->paginatedResponse(
             $productList->toArray(),
             $pagination['page'],
             $pagination['per_page'],
             $totalProducts
-        ));
+        );
     }
 
     public function featuredProducts(Request $request, Response $response)
@@ -71,12 +71,16 @@ class PsProductController extends Controller
             'page' => $pagination['page']
         ]);
         
-        return response($this->paginatedResponse(
+        $response = $this->paginatedResponse(
             $productsByCategory->toArray(),
             $pagination['page'],
             $pagination['per_page'],
             $totalProducts
-        ));
+        );
+
+        // build filers
+        $response['filters'] = $this->productService->buildFiltersProducts($category);
+        return $response;
     }
 
     public function productDetail(Request $request, Response $response, array $args)

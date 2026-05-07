@@ -52,9 +52,9 @@ $container->set(\DolzeZampa\WS\Service\PS\Carrier::class, function ($c) {
 });
 
 /** CONTROLLERS */
-$container->set(\DolzeZampa\WS\Http\Controller\PsProductController::class, function ($c) {
+$container->set(\DolzeZampa\WS\Http\Controller\ProductController::class, function ($c) {
     $productService = $c->get(\DolzeZampa\WS\Service\PS\Product::class);
-    return new \DolzeZampa\WS\Http\Controller\PsProductController($productService);
+    return new \DolzeZampa\WS\Http\Controller\ProductController($productService);
 });
 
 $container->set(\DolzeZampa\WS\Http\Controller\CategoryController::class, function ($c) {

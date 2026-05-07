@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace DolzeZampa\WS\Service\PS;
 
+use DolzeZampa\WS\Domain\Entities\FilterEntity;
 use DolzeZampa\WS\Domain\Entities\ProductEntity;
 use DolzeZampa\WS\Domain\Models\ProductLangTable;
 use Illuminate\Support\Collection;
@@ -108,5 +109,24 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
         $productData = $response->toArray()['products'][0];
         $product = ProductEntity::create($productData, $this);
         return $product;
+    }
+
+    public function buildFiltersProducts(int $categoryId): ?FilterEntity
+    {
+        $this->httpService->setUrl("/filters?id_category={$categoryId}&ws_key={$this->httpService->getConfig()->apikey}");
+        $response = $this->httpService->invoke('GET');
+
+        if($response->failed()) {
+            throw new \RuntimeException("Failed to retrieve products for filters: " . $response->getHttpCode());
+        }
+
+        if(empty($response->toArray()['filters'])) {
+            Log::warning("No filters found for category ID {$categoryId}");
+            return null; // No filters found for the category
+        }
+
+        $filtersData = $response->toArray()['filters'];
+        return FilterEntity::create($filtersData, $this);
+
     }
 }

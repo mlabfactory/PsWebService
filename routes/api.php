@@ -4,12 +4,12 @@
  */
 
 $app->get('/api/categories', DolzeZampa\WS\Http\Controller\CategoryController::class . ':categoryList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/product-list', DolzeZampa\WS\Http\Controller\PsProductController::class . ':productList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/product-featured', DolzeZampa\WS\Http\Controller\PsProductController::class . ':featuredProducts')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/products', DolzeZampa\WS\Http\Controller\PsProductController::class . ':productByCategory')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/products/{id}/related', DolzeZampa\WS\Http\Controller\PsProductController::class . ':productsRelated')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/products/filters', DolzeZampa\WS\Http\Controller\PsProductController::class . ':retriveProductFiltersList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/product/{slug}', DolzeZampa\WS\Http\Controller\PsProductController::class . ':productDetail')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
+$app->get('/api/product-list', DolzeZampa\WS\Http\Controller\ProductController::class . ':productList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
+$app->get('/api/product-featured', DolzeZampa\WS\Http\Controller\ProductController::class . ':featuredProducts')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
+$app->get('/api/products', DolzeZampa\WS\Http\Controller\ProductController::class . ':productByCategory')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
+$app->get('/api/products/{id}/related', DolzeZampa\WS\Http\Controller\ProductController::class . ':productsRelated')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
+$app->get('/api/products/filters', DolzeZampa\WS\Http\Controller\ProductController::class . ':retriveProductFiltersList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
+$app->get('/api/product/{slug}', DolzeZampa\WS\Http\Controller\ProductController::class . ':productDetail')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
 
 /** Carts api */
 $app->get('/api/cart/list/{customerId}', DolzeZampa\WS\Http\Controller\CartController::class . ':cartList');

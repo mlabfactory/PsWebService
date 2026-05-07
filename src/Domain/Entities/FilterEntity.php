@@ -1,0 +1,121 @@
+<?php
+declare(strict_types=1);
+
+namespace DolzeZampa\WS\Domain\Entities;
+
+use DolzeZampa\WS\Domain\ObjectInterface;
+use DolzeZampa\WS\Service\PS\PrestashopServiceInterface;
+
+class FilterEntity implements ObjectInterface
+{
+    /** @var array<string, mixed> */
+    private array $data;
+    private PrestashopServiceInterface $service;
+
+    const MUST_HAVE_KEYS = ['features', 'attributes', 'price_range', 'manufacturers'];
+
+    private function __construct(array $data, PrestashopServiceInterface $service)
+    {
+        $this->service = $service;
+        $this->data = $data;
+        $this->normalizeData();
+    }
+
+    public static function create(array $data, PrestashopServiceInterface $service): self
+    {
+        if (empty(array_diff(self::MUST_HAVE_KEYS, array_keys($data)))) {
+            throw new \InvalidArgumentException('Missing required keys: ' . implode(', ', array_diff(self::MUST_HAVE_KEYS, array_keys($data))));
+        }
+
+        return new self($data, $service);
+    }
+
+    public function toArray(): array
+    {
+        return $this->data;
+    }
+
+    public function toJson($options = 0): string
+    {
+        return json_encode($this->toArray(), $options);
+    }
+
+    public function __get(string $name): mixed
+    {
+        if (!array_key_exists($name, $this->data)) {
+            throw new \InvalidArgumentException('No argument found with ' . $name);
+        }
+
+        return $this->data[$name];
+    }
+
+    public function normalizeData(): void
+    {
+        $this->data = [
+            'features' => [
+                'materials' => $this->normalizeFeatureValues($this->data['features'], 'Materiale'),
+            ],
+            'attributes' => [
+                'colors' => $this->normalizeAttributeValues($this->data['attributes'], 'Colore'),
+                'sizes' => $this->normalizeAttributeValues($this->data['attributes'], 'Taglia'),
+            ],
+            'price_range' => [
+                'min' => (float) ($this->data['price_range']['min'] ?? 0),
+                'max' => (float) ($this->data['price_range']['max'] ?? 0),
+                'currency' => $this->data['price_range']['currency'] ?? '',
+            ],
+            'manufacturers' => [
+                'values' => array_map(function ($value) {
+                    return [
+                        'id_manufacturer' => (int) ($value['id_manufacturer'] ?? 0),
+                        'value' => $value['value'] ?? '',
+                    ];
+                }, $this->data['manufacturers']['values'] ?? []),
+            ],
+        ];
+    }
+
+    private function normalizeFeatureValues(array $feature, string $type): array
+    {
+        $materials = [];
+        foreach ($feature as $key => $data) {
+            if ($data['name'] == $type) {
+                foreach ($data['values'] as $value) {
+                    $materials[] = [
+                        "id_feature_value" => (int) $value['id_feature_value'],
+                        "value" => $value['value'] ?? '',
+                    ];
+                }
+            }
+        }
+
+        return [
+            'id_feature' => (int) $feature['id_feature'],
+            'name' => (int) $feature['name'],
+            'type' => (int) $feature['type'],
+            'values' => $materials,
+        ];
+    }
+
+    private function normalizeAttributeValues(array $attribute, string $type): array
+    {
+        $typeAttribute = [];
+        foreach ($attribute as $key => $data) {
+            if ($data['name'] == $type) {
+                foreach ($data['values'] as $value) {
+                    $typeAttribute[] = [
+                        "id_attribute" => (int) $value['id_attribute'],
+                        "value" => $value['value'] ?? '',
+                    ];
+                }
+            }
+        }
+
+        return [
+            'id_attribute_group' => (int) $attribute['id_attribute_group'],
+            'name' => (int) $attribute['name'],
+            'type' => (int) $attribute['type'],
+            'values' => $typeAttribute,
+        ];
+    }
+}
