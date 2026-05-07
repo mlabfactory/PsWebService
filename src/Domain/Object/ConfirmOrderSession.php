@@ -83,7 +83,7 @@ class ConfirmOrderSession implements ObjectInterface
             'id_customer' => isset($data['id_customer']) ? (int)$data['id_customer'] : null,
             'id_guest' => isset($data['id_guest']) ? (int)$data['id_guest'] : null,
             'create_account' => (bool)($data['create_account'] ?? false),
-            'id_carrier' => 14, //FIXME: Default carrier ID should be determined dynamically based on the cart details
+            'id_carrier' => isset($data['id_carrier']) ? (int) $data['id_carrier'] : 14,
         ];
     }
 

@@ -120,6 +120,9 @@ class OrderController extends CartController {
                 'success_url' => $_ENV['STRIPE_SUCCESS_URL'] ?? '',
                 'cancel_url' => $_ENV['STRIPE_CANCEL_URL'] ?? '',
                 'cart_id' => $payload['id_cart'],
+                'id_customer' => $payload['id_customer'] ?? null,
+                'id_guest' => $payload['id_guest'] ?? null,
+                'id_carrier' => $carrierId,
             ], $this->orderService);
 
             //recuperiamo il corriere scelto dal cliente per aggiungerlo alla sessione di pagamento

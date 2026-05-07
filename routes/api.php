@@ -27,6 +27,9 @@ $app->get('/api/order/history/{customerId}', DolzeZampa\WS\Http\Controller\Order
 $app->post('/api/order', DolzeZampa\WS\Http\Controller\OrderController::class . ':createOrder');
 $app->post('/api/order/confirm', DolzeZampa\WS\Http\Controller\OrderController::class . ':confirmOrder');
 
+/** Stripe webhook */
+$app->post('/api/webhooks/stripe', DolzeZampa\WS\Http\Controller\StripeWebhookController::class . ':handleWebhook');
+
 /** Carriers api */
 $app->get('/api/carriers', DolzeZampa\WS\Http\Controller\CarrierController::class . ':carrierList');//->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware(3600));
 $app->get('/api/carriers/available', DolzeZampa\WS\Http\Controller\CarrierController::class . ':availableCarriers');

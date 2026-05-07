@@ -81,3 +81,8 @@ $container->set(\DolzeZampa\WS\Http\Controller\CarrierController::class, functio
     $currierService = $c->get(\DolzeZampa\WS\Service\PS\Carrier::class);
     return new \DolzeZampa\WS\Http\Controller\CarrierController($currierService);
 });
+
+$container->set(\DolzeZampa\WS\Http\Controller\StripeWebhookController::class, function ($c) {
+    $orderService = $c->get(\DolzeZampa\WS\Service\PS\Order::class);
+    return new \DolzeZampa\WS\Http\Controller\StripeWebhookController($orderService);
+});

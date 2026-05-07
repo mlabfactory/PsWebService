@@ -39,18 +39,20 @@ class OrderSession implements ObjectInterface
     public function normalizeData(): void
     {
         $data = $this->data;
+        $cartId = $data['cart_id'] ?? null;
+
         $this->data = [
             'mode' => 'payment',
-            'success_url' => $data['success_url'] ?? '',
-            'cancel_url' => $data['cancel_url'] ?? '',
-            'line_items' => $data['line_items'] ?? []
+            'success_url' => ($data['success_url'] ?? '') . ($cartId !== null ? '?cart_id=' . $cartId : ''),
+            'cancel_url' => ($data['cancel_url'] ?? '') . ($cartId !== null ? '?cart_id=' . $cartId : ''),
+            'line_items' => $data['line_items'] ?? [],
+            'metadata' => array_filter([
+                'cart_id' => $cartId !== null ? (string) $cartId : null,
+                'id_customer' => isset($data['id_customer']) ? (string) $data['id_customer'] : null,
+                'id_guest' => isset($data['id_guest']) ? (string) $data['id_guest'] : null,
+                'id_carrier' => isset($data['id_carrier']) ? (string) $data['id_carrier'] : null,
+            ], fn($v) => $v !== null),
         ];
-
-        $successUrl = $this->data['success_url'] . '?cart_id=' . ($data['cart_id']);
-        $canelUrl = $this->data['cancel_url'] . '?cart_id=' . ($data['cart_id']);
-
-        $this->data['success_url'] = $successUrl;
-        $this->data['cancel_url'] = $canelUrl;
     }
 
     public function addLineItem(string $name, int $quantity, float $price): void
