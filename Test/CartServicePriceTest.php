@@ -45,7 +45,7 @@ final class CartServicePriceTest extends TestCase
         $cart = new Cart($httpService);
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageMatches('/Product #99 not found/');
+        $this->expectExceptionMessageMatches('/Product #99 not found in catalog/');
 
         $cart->getProductPriceById(99);
     }

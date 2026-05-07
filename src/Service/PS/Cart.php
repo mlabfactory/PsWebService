@@ -102,11 +102,11 @@ class Cart extends Carrier implements PrestashopServiceInterface {
             $products = $response->toArray()['products'] ?? [];
         } catch (\Exception $e) {
             Log::error("Failed to fetch server-side price for product #{$productId}: " . $e->getMessage());
-            throw new \RuntimeException("Failed to verify price for product #{$productId}");
+            throw new \RuntimeException("Failed to fetch price for product #{$productId}");
         }
 
         if (empty($products)) {
-            throw new \RuntimeException("Product #{$productId} not found in catalog");
+            throw new \RuntimeException("Product #{$productId} not found in catalog. Ensure the product exists and is published.");
         }
 
         $basePrice = (float) ($products[0]['price'] ?? 0.0);
