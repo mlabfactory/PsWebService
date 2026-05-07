@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Domain\Entities;
+namespace PS\Webservice\Domain\Entities;
 
-use DolzeZampa\WS\Domain\Enums\ImageTail;
-use DolzeZampa\WS\Domain\ObjectInterface;
-use DolzeZampa\WS\Service\PS\PrestashopServiceInterface;
-use DolzeZampa\WS\Traits\ProductBuilder;
+use PS\Webservice\Domain\Enums\ImageTail;
+use PS\Webservice\Domain\ObjectInterface;
+use PS\Webservice\Service\PS\PrestashopServiceInterface;
+use PS\Webservice\Traits\ProductBuilder;
 
 class CombinationEntity implements ObjectInterface
 {

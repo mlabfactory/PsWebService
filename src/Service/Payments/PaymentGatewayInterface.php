@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service\Payments;
+namespace PS\Webservice\Service\Payments;
  
-use DolzeZampa\WS\Domain\Object\OrderSession;
+use PS\Webservice\Domain\Object\OrderSession;
 
 interface PaymentGatewayInterface
 {

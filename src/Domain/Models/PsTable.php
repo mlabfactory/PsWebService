@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Domain\Models;
+namespace PS\Webservice\Domain\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

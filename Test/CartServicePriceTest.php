@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use DolzeZampa\WS\Service\HttpServiceInterface;
-use DolzeZampa\WS\Service\PS\Cart;
+use PS\Webservice\Service\HttpServiceInterface;
+use PS\Webservice\Service\PS\Cart;
 use PHPUnit\Framework\TestCase;
 
 final class CartServicePriceTest extends TestCase

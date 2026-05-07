@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-namespace DolzeZampa\WS\Traits;
+namespace PS\Webservice\Traits;
 
-use DolzeZampa\WS\Domain\Enums\ImageTail;
+use PS\Webservice\Domain\Enums\ImageTail;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;

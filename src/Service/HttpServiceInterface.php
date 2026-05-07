@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service;
+namespace PS\Webservice\Service;
 
-use DolzeZampa\WS\Domain\Object\WebserviceConfig;
-use DolzeZampa\WS\Domain\ObjectInterface;
+use PS\Webservice\Domain\Object\WebserviceConfig;
+use PS\Webservice\Domain\ObjectInterface;
 use Slim\Http\Interfaces\ResponseInterface;
 
 interface HttpServiceInterface {

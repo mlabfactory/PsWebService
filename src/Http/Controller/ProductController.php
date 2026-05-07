@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Http\Controller;
+namespace PS\Webservice\Http\Controller;
 
-use DolzeZampa\WS\Http\Controller\Controller;
-use DolzeZampa\WS\Service\PS\Product;
-use DolzeZampa\WS\Traits\PaginationTrait;
+use PS\Webservice\Http\Controller\Controller;
+use PS\Webservice\Service\PS\Product;
+use PS\Webservice\Traits\PaginationTrait;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 

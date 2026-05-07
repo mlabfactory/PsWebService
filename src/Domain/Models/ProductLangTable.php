@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Domain\Models;
+namespace PS\Webservice\Domain\Models;
 
-use DolzeZampa\WS\Domain\Models\PsTable;
+use PS\Webservice\Domain\Models\PsTable;
 
 
 final class ProductLangTable extends PsTable

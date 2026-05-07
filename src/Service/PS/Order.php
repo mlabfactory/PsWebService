@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service\PS;
+namespace PS\Webservice\Service\PS;
 
-use DolzeZampa\WS\Domain\Entities\CartEntity;
-use DolzeZampa\WS\Domain\Entities\OrderEntity;
-use DolzeZampa\WS\Domain\Object\ConfirmOrderSession;
-use DolzeZampa\WS\Service\HttpServiceInterface;
+use PS\Webservice\Domain\Entities\CartEntity;
+use PS\Webservice\Domain\Entities\OrderEntity;
+use PS\Webservice\Domain\Object\ConfirmOrderSession;
+use PS\Webservice\Service\HttpServiceInterface;
 use Illuminate\Support\Facades\Log;
 
 class Order extends Cart implements PrestashopServiceInterface {

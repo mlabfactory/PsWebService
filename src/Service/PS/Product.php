@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service\PS;
+namespace PS\Webservice\Service\PS;
 
-use DolzeZampa\WS\Domain\Entities\FilterEntity;
-use DolzeZampa\WS\Domain\Entities\ProductEntity;
-use DolzeZampa\WS\Domain\Models\ProductLangTable;
+use PS\Webservice\Domain\Entities\FilterEntity;
+use PS\Webservice\Domain\Entities\ProductEntity;
+use PS\Webservice\Domain\Models\ProductLangTable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 

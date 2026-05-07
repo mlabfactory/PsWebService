@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service\PS;
+namespace PS\Webservice\Service\PS;
 
-use DolzeZampa\WS\Domain\Entities\CarrierEntity;
+use PS\Webservice\Domain\Entities\CarrierEntity;
 use Illuminate\Support\Collection;
 
 class Carrier extends PrestashopService implements PrestashopServiceInterface {

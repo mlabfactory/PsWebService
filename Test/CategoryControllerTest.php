@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use DolzeZampa\WS\Http\Controller\CategoryController;
-use DolzeZampa\WS\Service\PS\Category;
+use PS\Webservice\Http\Controller\CategoryController;
+use PS\Webservice\Service\PS\Category;
 use Illuminate\Support\Collection;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;

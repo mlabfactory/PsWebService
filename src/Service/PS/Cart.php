@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service\PS;
+namespace PS\Webservice\Service\PS;
 
-use DolzeZampa\WS\Domain\Entities\CartEntity;
-use DolzeZampa\WS\Service\HttpServiceInterface;
+use PS\Webservice\Domain\Entities\CartEntity;
+use PS\Webservice\Service\HttpServiceInterface;
 use Illuminate\Support\Facades\Log;
 
 class Cart extends Carrier implements PrestashopServiceInterface {

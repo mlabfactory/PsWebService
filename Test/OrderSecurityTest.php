@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-use DolzeZampa\WS\Domain\Entities\CarrierEntity;
-use DolzeZampa\WS\Domain\Entities\CartEntity;
-use DolzeZampa\WS\Http\Controller\OrderController;
-use DolzeZampa\WS\Service\PS\Cart;
-use DolzeZampa\WS\Service\PS\Order;
+use PS\Webservice\Domain\Entities\CarrierEntity;
+use PS\Webservice\Domain\Entities\CartEntity;
+use PS\Webservice\Http\Controller\OrderController;
+use PS\Webservice\Service\PS\Cart;
+use PS\Webservice\Service\PS\Order;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

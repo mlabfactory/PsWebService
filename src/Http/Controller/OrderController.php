@@ -1,12 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Http\Controller;
+namespace PS\Webservice\Http\Controller;
 
-use DolzeZampa\WS\Domain\Entities\CustomerEntity;
-use DolzeZampa\WS\Domain\Object\ConfirmOrderSession;
-use DolzeZampa\WS\Service\PS\Order;
-use PaymentGatewayInterface;
+use PS\Webservice\Domain\Entities\CustomerEntity;
+use PS\Webservice\Domain\Object\ConfirmOrderSession;
+use PS\Webservice\Service\PS\Order;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -44,7 +43,7 @@ class OrderController extends CartController {
         return response($cartList);
 
     }
-
+    
     public function confirmOrder(Request $request, Response $response, array $argv): Response
     {
         $payload = $request->getParsedBody();
@@ -128,7 +127,7 @@ class OrderController extends CartController {
                 throw new \InvalidArgumentException('Invalid carrier ID: ' . $carrierId);
             }
 
-            $orderSession = \DolzeZampa\WS\Domain\Object\OrderSession::create([
+            $orderSession = \PS\Webservice\Domain\Object\OrderSession::create([
                 'success_url' => $_ENV['STRIPE_SUCCESS_URL'] ?? '',
                 'cancel_url' => $_ENV['STRIPE_CANCEL_URL'] ?? '',
                 'cart_id' => $payload['id_cart'],
@@ -202,7 +201,7 @@ class OrderController extends CartController {
 
         try {
             $paymentService = $this->initializePaymentService($payload['paymentMethod'] ?? 'stripe');
-            $orderSession = \DolzeZampa\WS\Domain\Object\OrderSession::create([
+            $orderSession = \PS\Webservice\Domain\Object\OrderSession::create([
                 'success_url' => $payload['success_url'] ?? $_ENV['STRIPE_SUCCESS_URL'] ?? '',
                 'cancel_url' => $payload['cancel_url'] ?? $_ENV['STRIPE_CANCEL_URL'] ?? '',
                 'cart_id' => $payload['id_cart'],
@@ -229,12 +228,12 @@ class OrderController extends CartController {
         }
     }
 
-    private function initializePaymentService(string $paymentMethod): \DolzeZampa\WS\Service\Payments\PaymentGatewayInterface
+    private function initializePaymentService(string $paymentMethod): \PS\Webservice\Service\Payments\PaymentGatewayInterface
     {
         switch ($paymentMethod) {
             case 'stripe':
                 $apiKey = $_ENV['STRIPE_API_KEY'] ?? throw new \RuntimeException('STRIPE_API_KEY not configured');
-                return \DolzeZampa\WS\Service\Payments\PaymentService::setApiKey($apiKey);
+                return \PS\Webservice\Service\Payments\PaymentService::setApiKey($apiKey);
             default:
                 throw new \InvalidArgumentException('Unsupported payment method: ' . $paymentMethod);
         }

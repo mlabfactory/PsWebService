@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Http\Controller;
+namespace PS\Webservice\Http\Controller;
 
-use DolzeZampa\WS\Domain\Entities\CustomerEntity;
-use DolzeZampa\WS\Domain\Object\ConfirmOrderSession;
-use DolzeZampa\WS\Service\PS\Order;
+use PS\Webservice\Domain\Entities\CustomerEntity;
+use PS\Webservice\Domain\Object\ConfirmOrderSession;
+use PS\Webservice\Service\PS\Order;
 use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;

@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use DolzeZampa\WS\Service\HttpServiceInterface;
-use DolzeZampa\WS\Service\PS\Category;
+use PS\Webservice\Service\HttpServiceInterface;
+use PS\Webservice\Service\PS\Category;
 use PHPUnit\Framework\TestCase;
 
 final class CategoryServiceTest extends TestCase

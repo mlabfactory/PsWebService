@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Domain\Enums;
+namespace PS\Webservice\Domain\Enums;
 
 enum ImageTail: string {
     case THUMBNAIL = 'default_xs';

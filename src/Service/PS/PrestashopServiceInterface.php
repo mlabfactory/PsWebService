@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service\PS;
+namespace PS\Webservice\Service\PS;
 
-use DolzeZampa\WS\Domain\Entities\AccessoryEntity;
-use DolzeZampa\WS\Domain\Entities\ProductFeatureEntity;
-use DolzeZampa\WS\Domain\Enums\ImageTail;
-use DolzeZampa\WS\Domain\ObjectInterface;
-use DolzeZampa\WS\Service\HttpServiceInterface;
+use PS\Webservice\Domain\Entities\AccessoryEntity;
+use PS\Webservice\Domain\Entities\ProductFeatureEntity;
+use PS\Webservice\Domain\Enums\ImageTail;
+use PS\Webservice\Domain\ObjectInterface;
+use PS\Webservice\Service\HttpServiceInterface;
 
 interface PrestashopServiceInterface
 {

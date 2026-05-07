@@ -1,6 +1,6 @@
 <?php
 
-use DolzeZampa\WS\Domain\ObjectInterface;
+use PS\Webservice\Domain\ObjectInterface;
 /**
  * This file is a helper file that contains various functions.
  */

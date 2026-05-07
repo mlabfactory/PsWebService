@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Http\Middleware;
+namespace PS\Webservice\Http\Middleware;
 
 use Illuminate\Support\Facades\Cache;
 use Psr\Http\Message\ResponseInterface;

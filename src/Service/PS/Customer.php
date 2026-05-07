@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service\PS;
+namespace PS\Webservice\Service\PS;
 
-use DolzeZampa\WS\Domain\Entities\CustomerEntity;
-use DolzeZampa\WS\Service\HttpServiceInterface;
+use PS\Webservice\Domain\Entities\CustomerEntity;
+use PS\Webservice\Service\HttpServiceInterface;
 use Illuminate\Support\Facades\Log;
 
 class Customer extends PrestashopService implements PrestashopServiceInterface

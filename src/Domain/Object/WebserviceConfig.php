@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Domain\Object;
+namespace PS\Webservice\Domain\Object;
 
-use DolzeZampa\WS\Domain\ObjectInterface;
-use DolzeZampa\WS\Service\PS\PrestashopServiceInterface;
+use PS\Webservice\Domain\ObjectInterface;
+use PS\Webservice\Service\PS\PrestashopServiceInterface;
 use InvalidArgumentException;
 
 final class WebserviceConfig implements ObjectInterface {

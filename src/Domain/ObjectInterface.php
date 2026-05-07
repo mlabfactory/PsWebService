@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Domain;
+namespace PS\Webservice\Domain;
 
-use DolzeZampa\WS\Service\PS\PrestashopServiceInterface;
+use PS\Webservice\Service\PS\PrestashopServiceInterface;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 

@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use DolzeZampa\WS\Domain\Entities\OrderEntity;
-use DolzeZampa\WS\Http\Controller\StripeWebhookController;
-use DolzeZampa\WS\Service\PS\Order;
+use PS\Webservice\Domain\Entities\OrderEntity;
+use PS\Webservice\Http\Controller\StripeWebhookController;
+use PS\Webservice\Service\PS\Order;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

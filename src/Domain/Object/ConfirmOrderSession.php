@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Domain\Object;
+namespace PS\Webservice\Domain\Object;
 
-use DolzeZampa\WS\Domain\Entities\CustomerEntity;
-use DolzeZampa\WS\Domain\ObjectInterface;
-use DolzeZampa\WS\Service\PS\PrestashopServiceInterface;
+use PS\Webservice\Domain\Entities\CustomerEntity;
+use PS\Webservice\Domain\ObjectInterface;
+use PS\Webservice\Service\PS\PrestashopServiceInterface;
 
 class ConfirmOrderSession implements ObjectInterface
 {

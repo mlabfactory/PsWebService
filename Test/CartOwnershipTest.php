@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use DolzeZampa\WS\Domain\Entities\CartEntity;
-use DolzeZampa\WS\Http\Controller\CartController;
-use DolzeZampa\WS\Service\PS\Cart;
+use PS\Webservice\Domain\Entities\CartEntity;
+use PS\Webservice\Http\Controller\CartController;
+use PS\Webservice\Service\PS\Cart;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

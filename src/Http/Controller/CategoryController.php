@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Http\Controller;
+namespace PS\Webservice\Http\Controller;
 
-use DolzeZampa\WS\Service\PS\Category;
+use PS\Webservice\Service\PS\Category;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Http\Controller;
+namespace PS\Webservice\Http\Controller;
 
-use DolzeZampa\WS\Domain\Entities\CustomerEntity;
-use DolzeZampa\WS\Service\PS\Customer;
+use PS\Webservice\Domain\Entities\CustomerEntity;
+use PS\Webservice\Service\PS\Customer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -146,7 +146,7 @@ class CustomerController extends Controller
         }
     }
 
-    private function buildServiceResponse(\DolzeZampa\WS\Service\HttpServiceInterface $serviceResponse, int $successCode = 200): Response
+    private function buildServiceResponse(\PS\Webservice\Service\HttpServiceInterface $serviceResponse, int $successCode = 200): Response
     {
         $statusCode = $serviceResponse->failed() ? $serviceResponse->getHttpCode() : $successCode;
 

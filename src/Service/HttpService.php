@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service;
+namespace PS\Webservice\Service;
 
-use DolzeZampa\WS\Domain\Object\WebserviceConfig;
-use DolzeZampa\WS\Domain\ObjectInterface;
-use DolzeZampa\WS\Service\HttpServiceInterface;
+use PS\Webservice\Domain\Object\WebserviceConfig;
+use PS\Webservice\Domain\ObjectInterface;
+use PS\Webservice\Service\HttpServiceInterface;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use Psr\Http\Client\ClientExceptionInterface;

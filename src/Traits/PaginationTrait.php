@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Traits;
+namespace PS\Webservice\Traits;
 
 trait PaginationTrait
 {

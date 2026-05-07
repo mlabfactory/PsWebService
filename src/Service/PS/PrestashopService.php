@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service\PS;
+namespace PS\Webservice\Service\PS;
 
-use DolzeZampa\WS\Domain\Entities\AccessoryEntity;
-use DolzeZampa\WS\Domain\Entities\CategoryEntity;
-use DolzeZampa\WS\Domain\Entities\CombinationEntity;
-use DolzeZampa\WS\Domain\Entities\ImageEntity;
-use DolzeZampa\WS\Domain\Entities\OptionEntity;
-use DolzeZampa\WS\Domain\Entities\ProductFeatureEntity;
-use DolzeZampa\WS\Domain\Entities\StockAvailableEntity;
-use DolzeZampa\WS\Domain\Enums\ImageTail;
-use DolzeZampa\WS\Service\HttpServiceInterface;
-use DolzeZampa\WS\Service\PS\PrestashopServiceInterface;
+use PS\Webservice\Domain\Entities\AccessoryEntity;
+use PS\Webservice\Domain\Entities\CategoryEntity;
+use PS\Webservice\Domain\Entities\CombinationEntity;
+use PS\Webservice\Domain\Entities\ImageEntity;
+use PS\Webservice\Domain\Entities\OptionEntity;
+use PS\Webservice\Domain\Entities\ProductFeatureEntity;
+use PS\Webservice\Domain\Entities\StockAvailableEntity;
+use PS\Webservice\Domain\Enums\ImageTail;
+use PS\Webservice\Service\HttpServiceInterface;
+use PS\Webservice\Service\PS\PrestashopServiceInterface;
 use Illuminate\Support\Facades\Log;
 
 class PrestashopService implements PrestashopServiceInterface {

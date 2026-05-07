@@ -3,35 +3,35 @@
  *  application apps
  */
 
-$app->get('/api/categories', DolzeZampa\WS\Http\Controller\CategoryController::class . ':categoryList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/product-list', DolzeZampa\WS\Http\Controller\ProductController::class . ':productList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/product-featured', DolzeZampa\WS\Http\Controller\ProductController::class . ':featuredProducts')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/products', DolzeZampa\WS\Http\Controller\ProductController::class . ':productByCategory')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/products/{id}/related', DolzeZampa\WS\Http\Controller\ProductController::class . ':productsRelated')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/products/filters', DolzeZampa\WS\Http\Controller\ProductController::class . ':retriveProductFiltersList')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
-$app->get('/api/product/{slug}', DolzeZampa\WS\Http\Controller\ProductController::class . ':productDetail')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware());
+$app->get('/api/categories', PS\Webservice\Http\Controller\CategoryController::class . ':categoryList')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
+$app->get('/api/product-list', PS\Webservice\Http\Controller\ProductController::class . ':productList')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
+$app->get('/api/product-featured', PS\Webservice\Http\Controller\ProductController::class . ':featuredProducts')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
+$app->get('/api/products', PS\Webservice\Http\Controller\ProductController::class . ':productByCategory')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
+$app->get('/api/products/{id}/related', PS\Webservice\Http\Controller\ProductController::class . ':productsRelated')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
+$app->get('/api/products/filters', PS\Webservice\Http\Controller\ProductController::class . ':retriveProductFiltersList')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
+$app->get('/api/product/{slug}', PS\Webservice\Http\Controller\ProductController::class . ':productDetail')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
 
 /** Carts api */
-$app->get('/api/cart/list/{customerId}', DolzeZampa\WS\Http\Controller\CartController::class . ':cartList');
-$app->get('/api/cart/{cartId}', DolzeZampa\WS\Http\Controller\CartController::class . ':getCart');
-$app->post('/api/cart', DolzeZampa\WS\Http\Controller\CartController::class . ':createCart');
-$app->post('/api/cart/{customerId}', DolzeZampa\WS\Http\Controller\CartController::class . ':addToCart');
+$app->get('/api/cart/list/{customerId}', PS\Webservice\Http\Controller\CartController::class . ':cartList');
+$app->get('/api/cart/{cartId}', PS\Webservice\Http\Controller\CartController::class . ':getCart');
+$app->post('/api/cart', PS\Webservice\Http\Controller\CartController::class . ':createCart');
+$app->post('/api/cart/{customerId}', PS\Webservice\Http\Controller\CartController::class . ':addToCart');
 /** Customer api */
-$app->post('/api/register', DolzeZampa\WS\Http\Controller\CustomerController::class . ':register');
-$app->post('/api/login', DolzeZampa\WS\Http\Controller\CustomerController::class . ':login');
-$app->post('/api/customers', DolzeZampa\WS\Http\Controller\CustomerController::class . ':createCustomer');
+$app->post('/api/register', PS\Webservice\Http\Controller\CustomerController::class . ':register');
+$app->post('/api/login', PS\Webservice\Http\Controller\CustomerController::class . ':login');
+$app->post('/api/customers', PS\Webservice\Http\Controller\CustomerController::class . ':createCustomer');
 
 /** Order api */
-$app->get('/api/order/{orderId}', DolzeZampa\WS\Http\Controller\OrderController::class . ':getOrder');
-$app->get('/api/order/history/{customerId}', DolzeZampa\WS\Http\Controller\OrderController::class . ':orderHistory');
-$app->post('/api/order', DolzeZampa\WS\Http\Controller\OrderController::class . ':createOrder');
-$app->post('/api/order/confirm', DolzeZampa\WS\Http\Controller\OrderController::class . ':confirmOrder');
+$app->get('/api/order/{orderId}', PS\Webservice\Http\Controller\OrderController::class . ':getOrder');
+$app->get('/api/order/history/{customerId}', PS\Webservice\Http\Controller\OrderController::class . ':orderHistory');
+$app->post('/api/order', PS\Webservice\Http\Controller\OrderController::class . ':createOrder');
+$app->post('/api/order/confirm', PS\Webservice\Http\Controller\OrderController::class . ':confirmOrder');
 
 /** Stripe webhook */
-$app->post('/api/webhooks/stripe', DolzeZampa\WS\Http\Controller\StripeWebhookController::class . ':handleWebhook');
+$app->post('/api/webhooks/stripe', PS\Webservice\Http\Controller\StripeWebhookController::class . ':handleWebhook');
 
 /** Carriers api */
-$app->get('/api/carriers', DolzeZampa\WS\Http\Controller\CarrierController::class . ':carrierList');//->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware(3600));
-$app->get('/api/carriers/available', DolzeZampa\WS\Http\Controller\CarrierController::class . ':availableCarriers');
-$app->get('/api/carriers/{id}', DolzeZampa\WS\Http\Controller\CarrierController::class . ':getCarrier')->addMiddleware(new \DolzeZampa\WS\Http\Middleware\CachingMiddleware(3600));
+$app->get('/api/carriers', PS\Webservice\Http\Controller\CarrierController::class . ':carrierList');//->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware(3600));
+$app->get('/api/carriers/available', PS\Webservice\Http\Controller\CarrierController::class . ':availableCarriers');
+$app->get('/api/carriers/{id}', PS\Webservice\Http\Controller\CarrierController::class . ':getCarrier')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware(3600));
 

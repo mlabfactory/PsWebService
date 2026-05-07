@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace DolzeZampa\WS\Service\PS;
+namespace PS\Webservice\Service\PS;
 
 class Option extends PrestashopService implements PrestashopServiceInterface {
    
