@@ -174,7 +174,7 @@ class Cart extends Carrier implements PrestashopServiceInterface {
             return [];
         }
 
-        $today = date('Y-m-d H:i:s');
+        $today = (new \DateTimeImmutable('now'))->format('Y-m-d H:i:s');
         $featured = array_values(array_filter($rows, static function (array $row) use ($today): bool {
             $isActive = !isset($row['active']) || (bool) $row['active'] === true;
             $hasQuantity = !isset($row['quantity']) || (int) $row['quantity'] > 0;
@@ -182,7 +182,7 @@ class Cart extends Carrier implements PrestashopServiceInterface {
             return $isActive && $hasQuantity && $isDateValid;
         }));
 
-        return array_slice($featured, 0, max(1, $limit));
+        return array_slice($featured, 0, max(0, $limit));
     }
 
     public function getCouponDetail(string $code): ?array
@@ -201,7 +201,7 @@ class Cart extends Carrier implements PrestashopServiceInterface {
             }
         }
 
-        return $rows[0];
+        return null;
     }
 
     public function validateCoupon(string $code, string $cartId, ?string $customerId = null, ?string $guestId = null): ?array
