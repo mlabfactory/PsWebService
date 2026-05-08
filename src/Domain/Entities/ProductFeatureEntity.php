@@ -57,4 +57,9 @@ class ProductFeatureEntity implements ObjectInterface
 	{
 		//
 	}
+
+	public function generatePayload(): \PS\Webservice\Domain\Object\PayloadServiceData
+	{
+		return new \PS\Webservice\Domain\Object\PayloadServiceData($this->toArray());
+	}
 }

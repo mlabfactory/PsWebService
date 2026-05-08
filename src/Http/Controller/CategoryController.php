@@ -18,7 +18,9 @@ class CategoryController extends Controller
 
     public function categoryList(Request $request, Response $response): Response
     {
-        $categories = $this->categoryService->categoriesList();
+        $categories = $this->categoryService->categoriesList([
+            'display' => 'full'
+        ]);
 
         return response([
             'success' => true,

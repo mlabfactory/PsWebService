@@ -8,7 +8,6 @@ $app->get('/api/product-list', PS\Webservice\Http\Controller\ProductController::
 $app->get('/api/product-featured', PS\Webservice\Http\Controller\ProductController::class . ':featuredProducts')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
 $app->get('/api/products', PS\Webservice\Http\Controller\ProductController::class . ':productByCategory')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
 $app->get('/api/products/{id}/related', PS\Webservice\Http\Controller\ProductController::class . ':productsRelated')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
-$app->get('/api/products/filters', PS\Webservice\Http\Controller\ProductController::class . ':retriveProductFiltersList')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
 $app->get('/api/product/{slug}', PS\Webservice\Http\Controller\ProductController::class . ':productDetail')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
 
 /** Carts api */

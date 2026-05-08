@@ -81,4 +81,9 @@ class OptionEntity implements ObjectInterface
 			'name' => (string) ($this->data['name'] ?? ''),
 		];
 	}
+
+	public function generatePayload(): \PS\Webservice\Domain\Object\PayloadServiceData
+	{
+		return new \PS\Webservice\Domain\Object\PayloadServiceData($this->toArray());
+	}
 }

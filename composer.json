@@ -1,5 +1,6 @@
 {
-    "name": "dolcezampa/webservice",
+    "name": "mlab/webservice",
+    "version": "1.0.0-beta",
     "description": "defines the dependencies required for a PHP microservice in a Dolce Zampa application",
     "type": "none",
     "license": "AGPL",
@@ -26,7 +27,8 @@
         "php-di/php-di": "^7.1",
         "guzzlehttp/guzzle": "^7.10",
         "illuminate/cache": "^11.51",
-        "stripe/stripe-php": "^20.1"
+        "stripe/stripe-php": "^20.1",
+        "hashids/hashids": "^5.0"
     },
     "require-dev": {
         "nikic/php-parser": "^5.0",

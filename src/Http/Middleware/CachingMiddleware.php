@@ -4,10 +4,11 @@ declare(strict_types=1);
 namespace PS\Webservice\Http\Middleware;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 class CachingMiddleware implements MiddlewareInterface
 {
@@ -28,6 +29,8 @@ class CachingMiddleware implements MiddlewareInterface
         $uri = $request->getUri()->getPath();
         $queryParams = http_build_query($request->getQueryParams());
         $cacheKey = 'api_cache:' . sha1($uri . '?' . $queryParams);
+
+        Log::debug("Invoking URL " . $uri . '?' . $queryParams);
 
         // Try to get from cache
         if (Cache::has($cacheKey)) {

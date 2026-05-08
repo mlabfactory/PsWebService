@@ -95,4 +95,9 @@ class CarrierEntity implements ObjectInterface
         // Fallback: return first value
         return (string) reset($languageArray);
     }
+
+	public function generatePayload(): \PS\Webservice\Domain\Object\PayloadServiceData
+	{
+		return new \PS\Webservice\Domain\Object\PayloadServiceData($this->toArray());
+	}
 }

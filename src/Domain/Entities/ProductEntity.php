@@ -84,4 +84,9 @@ class ProductEntity implements ObjectInterface
         $this->buildCategories();
         $this->buildStockAvailables();
     }
+
+	public function generatePayload(): \PS\Webservice\Domain\Object\PayloadServiceData
+	{
+		return new \PS\Webservice\Domain\Object\PayloadServiceData($this->toArray());
+	}
 }

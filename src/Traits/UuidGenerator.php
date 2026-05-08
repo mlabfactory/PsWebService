@@ -14,19 +14,24 @@ trait UuidGenerator
         return new Hashids($salt, $minLenght); // 12 è la lunghezza minima della stringa
     }
 
-    public function encodeId(int $id, string $type = 'generic'): string
+    public function encodeId(?int $id, string $type = 'generic'): ?string
     {
+        if ($id === null) {
+            return null;
+        }
         return $this->getHasher($type)->encode($id);
     }
 
-    public function decodeId(string $hash, string $type = 'generic'): int
+    public function decodeId(?string $hash, string $type = 'generic'): ?int
     {
-        $decoded = $this->getHasher($type)->decode($hash);
-
-        if (empty($decoded)) {
-            throw new \RuntimeException("Hash non valido o manipolato.");
+        if ($hash === null) {
+            return null;
         }
 
+        $decoded = $this->getHasher($type)->decode($hash);
+        if (empty($decoded)) {
+            throw new \InvalidArgumentException('Invalid hash provided: ' . $hash);
+        }
         return (int) $decoded[0];
     }
 }

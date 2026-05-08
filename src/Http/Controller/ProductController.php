@@ -79,8 +79,8 @@ class ProductController extends Controller
         );
 
         // build filers
-        $response['filters'] = $this->productService->buildFiltersProducts($category);
-        return $response;
+        $response['filters'] = $this->productService->buildFiltersProducts($categoryId);
+        return response($response);
     }
 
     public function productDetail(Request $request, Response $response, array $args)
@@ -121,23 +121,6 @@ class ProductController extends Controller
         return response([
             'success' => true,
             'data' => []
-        ]);
-    }
-
-    public function retriveProductFiltersList(Request $request, Response $response, array $args): Response
-    {
-        $id = $args['id'] ?? null;
-        if (!$id) {
-            return response([
-                'success' => false,
-                'message' => 'Product ID is required'
-            ], 400);
-        }
-
-        $filtersList = $this->productService->getProductFiltersList((int) $id);
-        return response([
-            'success' => true,
-            'data' => $filtersList->toArray()
         ]);
     }
 }

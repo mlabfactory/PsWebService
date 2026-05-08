@@ -38,7 +38,10 @@ class HttpService implements HttpServiceInterface
      */
     public function invoke(string $method, array | PayloadServiceData $data = []): self
     {
-        $data = $data->toArray();
+        if($data instanceof PayloadServiceData) {
+            $data = $data->toArray();
+        }
+        
         try {
             $config = $this->config;
             $stream = new Client($config->toArray());

@@ -20,6 +20,11 @@ trait ProductBuilder {
     protected function buildImageLink(array $imageTails = []): void
     {
         $associations = $this->data['associations'];
+        
+        if (!isset($associations['images']) || !is_array($associations['images'])) {
+            return; // No images to process
+        }
+
         foreach ($associations['images'] as $index => $image) {
             if (!isset($image['id'])) {
                 throw new \InvalidArgumentException("Each image association must have an 'id' field");

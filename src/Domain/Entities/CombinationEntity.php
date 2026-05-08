@@ -89,4 +89,9 @@ class CombinationEntity implements ObjectInterface
         $this->buildImageLink([ImageTail::ORIGINAL]);
 	}
 
+	public function generatePayload(): \PS\Webservice\Domain\Object\PayloadServiceData
+	{
+		return new \PS\Webservice\Domain\Object\PayloadServiceData($this->toArray());
+	}
+
 }
