@@ -180,7 +180,7 @@ class Cart extends Carrier implements PrestashopServiceInterface {
         return $coupons->filter(static function (CouponEntity $coupon) use ($now): bool {
             $isActive = (bool) $coupon->active === true;
             $hasQuantity = (int) $coupon->quantity > 0;
-            $dateToRaw = trim((string) $coupon->date_to);
+            $dateToRaw = trim((string) $coupon->valid_to);
 
             if ($dateToRaw === '') {
                 $isDateValid = true;

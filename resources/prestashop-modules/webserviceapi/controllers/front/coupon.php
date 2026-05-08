@@ -104,7 +104,7 @@ class webserviceapicouponModuleFrontController extends MlabFactoryApiBaseModuleF
         }
 
         $rows = Db::getInstance()->executeS(
-            'SELECT cr.`id_cart_rule`, cr.`code`, cr.`date_to`, cr.`quantity`, cr.`active`,
+            'SELECT cr.`id_cart_rule`, cr.`code`, cr.`date_from`, cr.`date_to`, cr.`quantity`, cr.`active`,
                     cr.`reduction_percent`, cr.`reduction_amount`, crl.`name`
              FROM `' . _DB_PREFIX_ . 'cart_rule` cr
              LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
@@ -165,7 +165,10 @@ class webserviceapicouponModuleFrontController extends MlabFactoryApiBaseModuleF
                 'name' => is_array($cartRule->name) && isset($cartRule->name[(int) $this->context->language->id])
                     ? (string) $cartRule->name[(int) $this->context->language->id]
                     : '',
+                'date_from' => (string) $cartRule->date_from,
                 'date_to' => (string) $cartRule->date_to,
+                'valid_from' => (string) $cartRule->date_from,
+                'valid_to' => (string) $cartRule->date_to,
                 'quantity' => (int) $cartRule->quantity,
                 'reduction_percent' => (float) $cartRule->reduction_percent,
                 'reduction_amount' => (float) $cartRule->reduction_amount,
@@ -235,7 +238,10 @@ class webserviceapicouponModuleFrontController extends MlabFactoryApiBaseModuleF
             'id' => isset($row['id_cart_rule']) ? (int) $row['id_cart_rule'] : 0,
             'code' => isset($row['code']) ? (string) $row['code'] : '',
             'name' => isset($row['name']) ? (string) $row['name'] : '',
+            'date_from' => isset($row['date_from']) ? (string) $row['date_from'] : '',
             'date_to' => isset($row['date_to']) ? (string) $row['date_to'] : '',
+            'valid_from' => isset($row['date_from']) ? (string) $row['date_from'] : '',
+            'valid_to' => isset($row['date_to']) ? (string) $row['date_to'] : '',
             'quantity' => isset($row['quantity']) ? (int) $row['quantity'] : 0,
             'active' => isset($row['active']) ? (bool) $row['active'] : false,
             'reduction_percent' => isset($row['reduction_percent']) ? (float) $row['reduction_percent'] : 0.0,

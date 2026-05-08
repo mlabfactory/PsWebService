@@ -49,11 +49,21 @@ class CouponEntity implements ObjectInterface
             $name = $this->extractLanguageValue($name);
         }
 
+        $validFrom = isset($this->data['valid_from'])
+            ? (string) $this->data['valid_from']
+            : (isset($this->data['date_from']) ? (string) $this->data['date_from'] : '');
+        $validTo = isset($this->data['valid_to'])
+            ? (string) $this->data['valid_to']
+            : (isset($this->data['date_to']) ? (string) $this->data['date_to'] : '');
+
         $this->data = [
             'id' => isset($this->data['id']) ? (int) $this->data['id'] : 0,
             'code' => isset($this->data['code']) ? (string) $this->data['code'] : '',
             'name' => (string) $name,
-            'date_to' => isset($this->data['date_to']) ? (string) $this->data['date_to'] : '',
+            'valid_from' => $validFrom,
+            'valid_to' => $validTo,
+            'date_from' => $validFrom,
+            'date_to' => $validTo,
             'quantity' => isset($this->data['quantity']) ? (int) $this->data['quantity'] : 0,
             'active' => isset($this->data['active']) ? (bool) $this->data['active'] : false,
             'reduction_percent' => isset($this->data['reduction_percent']) ? (float) $this->data['reduction_percent'] : 0.0,
