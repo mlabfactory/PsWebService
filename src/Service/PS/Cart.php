@@ -178,10 +178,9 @@ class Cart extends Carrier implements PrestashopServiceInterface {
 
         $now = new \DateTimeImmutable();
         return $coupons->filter(static function (CouponEntity $coupon) use ($now): bool {
-            $row = $coupon->toArray();
-            $isActive = !isset($row['active']) || (bool) $row['active'] === true;
-            $hasQuantity = !isset($row['quantity']) || (int) $row['quantity'] > 0;
-            $dateToRaw = trim((string) ($row['date_to'] ?? ''));
+            $isActive = (bool) $coupon->active === true;
+            $hasQuantity = (int) $coupon->quantity > 0;
+            $dateToRaw = trim((string) $coupon->date_to);
 
             if ($dateToRaw === '') {
                 $isDateValid = true;
