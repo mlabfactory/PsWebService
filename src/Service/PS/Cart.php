@@ -4,8 +4,10 @@ declare(strict_types=1);
 namespace PS\Webservice\Service\PS;
 
 use PS\Webservice\Domain\Entities\CartEntity;
+use PS\Webservice\Domain\Entities\CouponEntity;
 use PS\Webservice\Service\HttpServiceInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 use PS\Webservice\Traits\UuidGenerator;
 
 class Cart extends Carrier implements PrestashopServiceInterface {
@@ -167,15 +169,16 @@ class Cart extends Carrier implements PrestashopServiceInterface {
         return $response;
     }
 
-    public function getFeaturedCoupons(int $limit = 6): array
+    public function getFeaturedCoupons(): Collection
     {
-        $rows = $this->getCartRules();
-        if (empty($rows)) {
-            return [];
+        $coupons = $this->getCartRules();
+        if ($coupons->isEmpty()) {
+            return new Collection();
         }
 
         $now = new \DateTimeImmutable();
-        $featured = array_values(array_filter($rows, static function (array $row) use ($now): bool {
+        return $coupons->filter(static function (CouponEntity $coupon) use ($now): bool {
+            $row = $coupon->toArray();
             $isActive = !isset($row['active']) || (bool) $row['active'] === true;
             $hasQuantity = !isset($row['quantity']) || (int) $row['quantity'] > 0;
             $dateToRaw = trim((string) ($row['date_to'] ?? ''));
@@ -193,31 +196,29 @@ class Cart extends Carrier implements PrestashopServiceInterface {
             }
 
             return $isActive && $hasQuantity && $isDateValid;
-        }));
-
-        return array_slice($featured, 0, max(0, $limit));
+        })->values();
     }
 
-    public function getCouponDetail(string $code): ?array
+    public function getCouponDetail(string $code): ?CouponEntity
     {
-        $rows = $this->getCartRules([
+        $coupons = $this->getCartRules([
             'code' => $code,
         ]);
 
-        if (empty($rows)) {
+        if ($coupons->isEmpty()) {
             return null;
         }
 
-        foreach ($rows as $row) {
-            if (isset($row['code']) && strcasecmp((string) $row['code'], $code) === 0) {
-                return $row;
+        foreach ($coupons as $coupon) {
+            if (strcasecmp((string) $coupon->code, $code) === 0) {
+                return $coupon;
             }
         }
 
         return null;
     }
 
-    public function validateCoupon(string $code, string $cartId, ?string $customerId = null, ?string $guestId = null): ?array
+    public function validateCoupon(string $code, string $cartId, ?string $customerId = null, ?string $guestId = null): bool
     {
         $query = [
             'code' => $code,
@@ -234,40 +235,48 @@ class Cart extends Carrier implements PrestashopServiceInterface {
 
         $data = $this->invokeCartRules($query);
         if ($data === null) {
-            return null;
+            return false;
         }
 
         if (isset($data['data']) && is_array($data['data'])) {
             $data = $data['data'];
         }
 
-        return is_array($data) ? $data : null;
+        if (!is_array($data)) {
+            return false;
+        }
+
+        return (bool) ($data['valid'] ?? false);
     }
 
     /**
      * @param array<string, mixed> $queryParams
-     * @return array<int, array<string, mixed>>
+     * @return Collection<int, CouponEntity>
      */
-    private function getCartRules(array $queryParams = []): array
+    private function getCartRules(array $queryParams = []): Collection
     {
         $data = $this->invokeCartRules($queryParams);
         if ($data === null) {
-            return [];
+            return new Collection();
         }
 
         if (isset($data['data']) && is_array($data['data'])) {
             $data = $data['data'];
         }
 
+        $rows = array();
         if (isset($data['cart_rules']) && is_array($data['cart_rules'])) {
-            return array_values(array_filter($data['cart_rules'], 'is_array'));
+            $rows = array_values(array_filter($data['cart_rules'], 'is_array'));
+        } elseif (array_is_list($data)) {
+            $rows = array_values(array_filter($data, 'is_array'));
         }
 
-        if (array_is_list($data)) {
-            return array_values(array_filter($data, 'is_array'));
+        $collection = new Collection();
+        foreach ($rows as $row) {
+            $collection->push(CouponEntity::create($row, $this));
         }
 
-        return [];
+        return $collection;
     }
 
     /**

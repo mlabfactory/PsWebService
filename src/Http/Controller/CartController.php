@@ -8,8 +8,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use PS\Webservice\Service\PS\Cart;
 
 class CartController extends Controller {
-    private const DEFAULT_FEATURED_COUPON_LIMIT = 6;
-
     private Cart $cartService;
 
     public function __construct(Cart $cartService)
@@ -96,12 +94,7 @@ class CartController extends Controller {
 
     public function getFeaturedCoupons(Request $request, Response $response, array $argv): Response
     {
-        $limit = (int) ($request->getQueryParams()['limit'] ?? self::DEFAULT_FEATURED_COUPON_LIMIT);
-        if ($limit <= 0) {
-            $limit = self::DEFAULT_FEATURED_COUPON_LIMIT;
-        }
-
-        return response($this->cartService->getFeaturedCoupons($limit));
+        return response($this->cartService->getFeaturedCoupons()->toArray());
     }
 
     public function getCouponDetail(Request $request, Response $response, array $argv): Response
@@ -113,7 +106,7 @@ class CartController extends Controller {
             return response(['error' => 'Coupon not found'], 404);
         }
 
-        return response($coupon);
+        return response($coupon->toArray());
     }
 
     public function validateCoupon(Request $request, Response $response, array $argv): Response
@@ -128,12 +121,8 @@ class CartController extends Controller {
             return response(['error' => 'Either customer_id or guest_id must be provided as a query parameter'], 400);
         }
 
-        $validation = $this->cartService->validateCoupon($code, $cartId, $customerId, $guestId);
-        if ($validation === null) {
-            return response(['error' => 'Coupon validation failed or coupon not found'], 404);
-        }
-
-        return response($validation);
+        $isValid = $this->cartService->validateCoupon($code, $cartId, $customerId, $guestId);
+        return response(['valid' => $isValid]);
     }
 
     protected function validateCartPayload(array $payload): bool

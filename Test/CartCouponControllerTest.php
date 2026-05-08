@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use PS\Webservice\Http\Controller\CartController;
 use PS\Webservice\Service\PS\Cart;
+use Illuminate\Support\Collection;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -18,13 +19,12 @@ final class CartCouponControllerTest extends TestCase
 
         $cartService->expects($this->once())
             ->method('getFeaturedCoupons')
-            ->with(3)
-            ->willReturn([['code' => 'SPRING10']]);
+            ->willReturn(new Collection([['code' => 'SPRING10']]));
 
         $controller = new CartController($cartService);
 
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getQueryParams')->willReturn(['limit' => 3]);
+        $request->method('getQueryParams')->willReturn([]);
 
         $response = $this->createMock(ResponseInterface::class);
         $result = $controller->getFeaturedCoupons($request, $response, []);
@@ -84,7 +84,7 @@ final class CartCouponControllerTest extends TestCase
         $cartService->expects($this->once())
             ->method('validateCoupon')
             ->with('SAVE10', 'abc', 'cust', null)
-            ->willReturn(['valid' => true, 'message' => 'ok']);
+            ->willReturn(true);
 
         $controller = new CartController($cartService);
 
@@ -95,6 +95,6 @@ final class CartCouponControllerTest extends TestCase
         $result = $controller->validateCoupon($request, $response, ['code' => 'SAVE10', 'cartId' => 'abc']);
 
         $this->assertSame(200, $result->getStatusCode());
-        $this->assertSame(['valid' => true, 'message' => 'ok'], json_decode((string) $result->getBody(), true));
+        $this->assertSame(['valid' => true], json_decode((string) $result->getBody(), true));
     }
 }
