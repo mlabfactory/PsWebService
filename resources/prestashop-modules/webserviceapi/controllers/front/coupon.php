@@ -206,7 +206,20 @@ class webserviceapicouponModuleFrontController extends MlabFactoryApiBaseModuleF
         if ((int) $cart->id_customer > 0) {
             $customer = new Customer((int) $cart->id_customer);
             if (Validate::isLoadedObject($customer)) {
-                $this->getCustomerContext($customer);
+                $this->context->customer = $customer;
+                $this->context->language = new Language((int) ($customer->id_lang ?: Configuration::get('PS_LANG_DEFAULT')));
+                $this->context->currency = new Currency((int) Configuration::get('PS_CURRENCY_DEFAULT'));
+
+                if ($this->context->cookie) {
+                    $this->context->cookie->id_customer = (int) $customer->id;
+                    $this->context->cookie->customer_lastname = (string) $customer->lastname;
+                    $this->context->cookie->customer_firstname = (string) $customer->firstname;
+                    $this->context->cookie->logged = true;
+                    $this->context->cookie->is_guest = false;
+                    $this->context->cookie->passwd = (string) $customer->passwd;
+                    $this->context->cookie->email = (string) $customer->email;
+                    $this->context->cookie->id_lang = (int) $this->context->language->id;
+                }
             }
         }
 
