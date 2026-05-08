@@ -49,12 +49,8 @@ class CouponEntity implements ObjectInterface
             $name = $this->extractLanguageValue($name);
         }
 
-        $validFrom = isset($this->data['valid_from'])
-            ? (string) $this->data['valid_from']
-            : (isset($this->data['date_from']) ? (string) $this->data['date_from'] : '');
-        $validTo = isset($this->data['valid_to'])
-            ? (string) $this->data['valid_to']
-            : (isset($this->data['date_to']) ? (string) $this->data['date_to'] : '');
+        $validFrom = (string) ($this->data['valid_from'] ?? $this->data['date_from'] ?? '');
+        $validTo = (string) ($this->data['valid_to'] ?? $this->data['date_to'] ?? '');
 
         $this->data = [
             'id' => isset($this->data['id']) ? (int) $this->data['id'] : 0,
@@ -62,6 +58,7 @@ class CouponEntity implements ObjectInterface
             'name' => (string) $name,
             'valid_from' => $validFrom,
             'valid_to' => $validTo,
+            // Kept for backward compatibility with existing API consumers.
             'date_from' => $validFrom,
             'date_to' => $validTo,
             'quantity' => isset($this->data['quantity']) ? (int) $this->data['quantity'] : 0,
