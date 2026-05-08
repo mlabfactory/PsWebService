@@ -8,7 +8,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use PS\Webservice\Service\PS\Cart;
 
 class CartController extends Controller {
-
     private Cart $cartService;
 
     public function __construct(Cart $cartService)
@@ -91,6 +90,39 @@ class CartController extends Controller {
         }
 
         return response($cart->toArray(), 201);
+    }
+
+    public function getFeaturedCoupons(Request $request, Response $response, array $argv): Response
+    {
+        return response($this->cartService->getFeaturedCoupons()->toArray());
+    }
+
+    public function getCouponDetail(Request $request, Response $response, array $argv): Response
+    {
+        $code = (string) ($argv['code'] ?? '');
+        $coupon = $this->cartService->getCouponDetail($code);
+
+        if ($coupon === null) {
+            return response(['error' => 'Coupon not found'], 404);
+        }
+
+        return response($coupon->toArray());
+    }
+
+    public function validateCoupon(Request $request, Response $response, array $argv): Response
+    {
+        $code = (string) ($argv['code'] ?? '');
+        $cartId = (string) ($argv['cartId'] ?? '');
+        $queryParams = $request->getQueryParams();
+        $customerId = isset($queryParams['customer_id']) ? (string) $queryParams['customer_id'] : null;
+        $guestId = isset($queryParams['guest_id']) ? (string) $queryParams['guest_id'] : null;
+
+        if ($customerId === null && $guestId === null) {
+            return response(['error' => 'Either customer_id or guest_id must be provided as a query parameter'], 400);
+        }
+
+        $isValid = $this->cartService->validateCoupon($code, $cartId, $customerId, $guestId);
+        return response(['valid' => $isValid]);
     }
 
     protected function validateCartPayload(array $payload): bool
