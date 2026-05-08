@@ -174,11 +174,12 @@ class Cart extends Carrier implements PrestashopServiceInterface {
             return [];
         }
 
-        $today = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
-        $featured = array_values(array_filter($rows, static function (array $row) use ($today): bool {
+        $todayTs = (new \DateTimeImmutable())->getTimestamp();
+        $featured = array_values(array_filter($rows, static function (array $row) use ($todayTs): bool {
             $isActive = !isset($row['active']) || (bool) $row['active'] === true;
             $hasQuantity = !isset($row['quantity']) || (int) $row['quantity'] > 0;
-            $isDateValid = empty($row['date_to']) || (string) $row['date_to'] >= $today;
+            $dateToTs = isset($row['date_to']) ? strtotime((string) $row['date_to']) : false;
+            $isDateValid = $dateToTs === false || $dateToTs >= $todayTs;
             return $isActive && $hasQuantity && $isDateValid;
         }));
 
