@@ -18,8 +18,7 @@ $app->post('/api/cart/{customerId}', PS\Webservice\Http\Controller\CartControlle
 $app->get('/api/coupons/featured', PS\Webservice\Http\Controller\CartController::class . ':getFeaturedCoupons');
 $app->get('/api/coupons/{code}', PS\Webservice\Http\Controller\CartController::class . ':getCouponDetail');
 $app->get('/api/coupons/{code}/validate/{cartId}', PS\Webservice\Http\Controller\CartController::class . ':validateCoupon');
-$app->get('/api/coupon/{code}', PS\Webservice\Http\Controller\CartController::class . ':getCouponDetail');
-$app->get('/api/coupon/{code}/validate/{cartId}', PS\Webservice\Http\Controller\CartController::class . ':validateCoupon');
+
 /** Customer api */
 $app->post('/api/register', PS\Webservice\Http\Controller\CustomerController::class . ':register');
 $app->post('/api/login', PS\Webservice\Http\Controller\CustomerController::class . ':login');
