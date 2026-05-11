@@ -132,7 +132,8 @@ class CartController extends Controller {
 
     public function getCartRules(Request $request, Response $response, array $argv): Response
     {
-        $cartRules = CartRuleEntity::create([], $this->cartService);
+        $cartRuleSettings = file_get_contents(__DIR__ . '/../../../storage/configs/cart_rules.json');
+        $cartRules = CartRuleEntity::create(json_decode($cartRuleSettings, true), $this->cartService);
         return response($cartRules->toArray());
     }
 

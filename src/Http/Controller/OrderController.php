@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PS\Webservice\Http\Controller;
 
+use PS\Webservice\Domain\Entities\CartRuleEntity;
 use PS\Webservice\Service\PS\Order;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -111,6 +112,7 @@ class OrderController extends CartController {
         // Ownership check: require customer or guest identification — never trust anonymous cart access
         $customerId = isset($payload['id_customer']) ? $payload['id_customer'] : null;
         $guestId = isset($payload['id_guest']) ? $payload['id_guest'] : null;
+        $cartRules = CartRuleEntity::create($payload['cart_rules'], $this->orderService) ?? [];
 
         if ($customerId === null && $guestId === null) {
             return response(['error' => 'Customer ID or guest ID is required'], 403);
@@ -123,7 +125,7 @@ class OrderController extends CartController {
 
         // Create payment session
         try {
-            $paymentService = $this->initializePaymentService($payload['paymentMethod'] ?? 'stripe');
+            $paymentService = $this->initializePaymentService(env('DEFAULT_PAYMENT_METHOD', 'stripe'));
 
             //recuperiamo il corriere scelto dal cliente per aggiungerlo alla sessione di pagamento
             $carrierId = $payload['id_carrier'] ?? null;
@@ -148,7 +150,8 @@ class OrderController extends CartController {
             $orderSession->addLineItem(
                 name: $carrierDetails->name,
                 quantity: 1,
-                price: (float) $carrierDetails->price_with_tax
+                price: (float) $carrierDetails->price_with_tax,
+                type: 'carrier'
             );
             
             // Server-side price validation: fetch each product price directly from the catalog.
@@ -163,6 +166,9 @@ class OrderController extends CartController {
                     price: $serverPrice
                 );
             }
+
+            // at the last we need to add cart rules if there are any, but only if they have a positive value (discounts only, no vouchers with zero or negative value)
+            $orderSession->addCartRule($cartRules);
             
             $checkoutUrl = $paymentService->createPaymentSession($orderSession);
             

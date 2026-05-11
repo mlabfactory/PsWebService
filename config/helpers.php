@@ -26,13 +26,24 @@ if(!function_exists('response')) {
             return $errorResponse->withStatus(500);
         }
         
-        $response->getBody()->write($jsonData);
+        $response->getBody()->write(
+            json_encode([
+            "success" => $statusCode >= 200 && $statusCode < 300,
+            "data" => $jsonData
+        ],true)
+        );
 
         foreach ($headers as $key => $value) {
             $response = $response->withHeader($key, $value);
         }
         
         return $response->withHeader('Content-Type', 'application/json')->withStatus($statusCode);
+    }
+
+    if(!function_exists('storage_path')) {
+        function storage_path(string $path = ''): string {
+            return __DIR__ . '/../storage/' . ltrim($path, '/');
+        }
     }
 }
 

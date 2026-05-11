@@ -64,7 +64,7 @@ final class StripeWebhookControllerTest extends TestCase
         $this->assertArrayHasKey('error', $body);
     }
 
-    public function test_returns_400_on_invalid_stripe_signature(): void
+    public function test_returns_400_on_invalid_relative_signature(): void
     {
         $_ENV['STRIPE_WEBHOOK_SECRET'] = 'whsec_test123';
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PS\Webservice\Domain\Entities;
 
 use Carbon\Carbon;
+use PS\Webservice\Domain\Object\Rule;
 use PS\Webservice\Domain\ObjectInterface;
 use PS\Webservice\Service\PS\PrestashopServiceInterface;
 use PS\Webservice\Traits\UuidGenerator;
@@ -49,26 +50,8 @@ class CartRuleEntity implements ObjectInterface
 
     public function normalizeData(): void
     {
-        $rule = [
-            'id' => $this->encodeId(2026, 'cart-rule'),
-            'rule' => 'free-shipping',
-            'conditions' => [
-                'valid-from' => Carbon::now()->subDays(10)->toDateTimeString(),
-                'valid-to' => Carbon::now()->addYear()->toDateTimeString(),
-                'minimum-spend' => 79.00,
-                'applicable' => [],
-                'excluded' => [],
-                'discount' => [
-                    'type' => 'shipping',
-                    'value' => 0.00
-                ]
-
-            ]
-
-        ];
-
-        foreach ($rule as $key => $value) {
-                $this->data['rule'][] = $value;
+        foreach ($this->data as $key => $value) {
+                $this->data['rule'][] = new Rule($key);
         }
     }
 

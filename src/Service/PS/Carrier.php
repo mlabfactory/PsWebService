@@ -16,6 +16,7 @@ class Carrier extends PrestashopService implements PrestashopServiceInterface {
      */
     public function carriersList(array $displayOptions = ['display' => 'full']): Collection
     {
+
         // Add filter for active carriers
         if (!isset($displayOptions['filter[active]'])) {
             $displayOptions['filter[active]'] = 1;
@@ -38,7 +39,14 @@ class Carrier extends PrestashopService implements PrestashopServiceInterface {
         $collection = new Collection();
         $carriers = $response->toArray()['carriers'] ?? [];
         
+        $carrierConfigurations = $this->getCarrierConfigurations();
         foreach ($carriers as $carrierData) {
+            foreach ($carrierConfigurations as $config) {
+                if ($config['id_carrier'] === (int)$carrierData['id']) {
+                    $carrierData = array_merge($carrierData, $config);
+                    break;
+                }
+            }
             $collection->push(CarrierEntity::create($carrierData, $this));
         }
 
@@ -92,5 +100,16 @@ class Carrier extends PrestashopService implements PrestashopServiceInterface {
         }
 
         return $this->carriersList($filters);
+    }
+
+    private function getCarrierConfigurations(): array
+    {
+        $configurations = file_get_contents(storage_path('configs/carriers.json'));
+
+        if (empty($configurations)) {
+            throw new \RuntimeException("Failed to retrieve carrier configurations: ");
+        }
+
+        return json_decode($configurations, true);
     }
 }

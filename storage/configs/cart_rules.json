@@ -1,0 +1,19 @@
+[
+    {
+        "rule": {
+            "id": "204953860521",
+            "rule": "free-shipping",
+            "conditions": {
+                "valid-from": "2020-01-01",
+                "valid-to": "2100-01-01",
+                "minimum-spend": 79.00,
+                "applicable": [],
+                "excluded": [],
+                "discount": {
+                    "type": "shipping",
+                    "value": 0.00
+                }
+            }
+        }
+    }
+]

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace PS\Webservice\Domain\Object;
 
+use PS\Webservice\Domain\Entities\CarrierEntity;
+use PS\Webservice\Domain\Entities\CartRuleEntity;
 use PS\Webservice\Domain\ObjectInterface;
 use PS\Webservice\Service\PS\PrestashopServiceInterface;
 use PS\Webservice\Traits\UuidGenerator;
@@ -71,9 +73,10 @@ class OrderSession implements ObjectInterface
         return $url . $separator . urlencode($param) . '=' . urlencode((string) $value);
     }
 
-    public function addLineItem(string $name, int $quantity, float $price): void
+    public function addLineItem(string $name, int $quantity, float $price, string $type = 'product'): void
     {
         $this->data['line_items'][] = [
+            'type' => $type,
             'price_data' => [
                 'currency' => 'eur',
                 'product_data' => [
@@ -83,6 +86,21 @@ class OrderSession implements ObjectInterface
             ],
             'quantity' => $quantity
         ];
+    }
+
+    public function addCartRule(CartRuleEntity $cartRule): void
+    {
+        $cartRules = $cartRule->data;
+        /** @var Rule $rule */
+        foreach($cartRule as $rule) {
+            $id = $rule->stripe_id;
+            $this->data['discounts']['coupon'] = $id; //FIXME: we need to create a coupon in Stripe for this cart rule and use its ID here
+        }
+    }
+
+    public function addCarrier(CarrierEntity $carrier): void
+    {
+        $this->data['shipping_options']['shipping_rate'] = 'shr_1TVqLaK37RWIfqdNW4HF98Df'; //FIXME: we need to create a shipping rate in Stripe for this carrier and use its ID here 
     }
 
     public function generatePayload(): PayloadServiceData
