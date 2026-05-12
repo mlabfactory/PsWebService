@@ -61,6 +61,13 @@ final class WebserviceConfig implements ObjectInterface {
         ];
     }
 
+    public function authToken(string $token): self
+    {
+        $this->header['Authorization'] = "Bearer $token";
+
+        return $this;
+    }
+
     public function toJson($options = 0): string
     {
         return json_encode($this->toArray(), $options);

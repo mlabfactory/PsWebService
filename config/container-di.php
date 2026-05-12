@@ -13,6 +13,7 @@ $container->set(\PS\Webservice\Service\HttpService::class, function ($c) {
 
         ]
     );
+    $webserviceCOnfig->authToken(env('WEBSERVICE_KEY'));
     return new \PS\Webservice\Service\HttpService($webserviceCOnfig);
 });
 

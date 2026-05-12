@@ -4,13 +4,19 @@
     "description": "defines the dependencies required for a PHP microservice in a Dolce Zampa application",
     "type": "none",
     "license": "AGPL",
+    "repositories": {
+        "mdf/json-database-storage": {
+            "type": "vcs",
+            "url": "https://github.com/marcodefelice/JsonDatabase-storage.git"
+        }
+    },
     "require": {
         "php": "^8.1",
         "slim/slim": "^4.13",
         "doctrine/dbal": "^4.0",
         "symfony/var-dumper": "^7.0",
         "ramsey/uuid": "^4.7",
-        "vlucas/phpdotenv": "^5.6",
+        "vlucas/phpdotenv": "5.6.x-dev",
         "illuminate/database": "^11.0",
         "laravel/serializable-closure": "^1.3",
         "symfony/serializer": "^7.0",
@@ -28,7 +34,8 @@
         "guzzlehttp/guzzle": "^7.10",
         "illuminate/cache": "^11.51",
         "stripe/stripe-php": "^20.1",
-        "hashids/hashids": "^5.0"
+        "hashids/hashids": "^5.0",
+        "mdf/json-database-storage": "0-alpha"
     },
     "require-dev": {
         "nikic/php-parser": "^5.0",
@@ -49,5 +56,5 @@
             "email": "marco.defelice@mlabfactory.it"
         }
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "dev"
 }

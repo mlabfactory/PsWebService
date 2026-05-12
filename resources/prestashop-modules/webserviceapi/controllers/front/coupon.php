@@ -95,7 +95,7 @@ class webserviceapicouponModuleFrontController extends MlabFactoryApiBaseModuleF
             ? (int) $this->context->shop->id
             : 0;
 
-        $where = 'cr.`deleted` = 0';
+        $where = 'cr.`active` = 1';
         if ($couponCode !== '') {
             $where .= ' AND cr.`code` = \'' . pSQL($couponCode) . '\'';
         }

@@ -38,3 +38,6 @@ $app->post('/api/webhooks/stripe', PS\Webservice\Http\Controller\StripeWebhookCo
 $app->get('/api/carriers', PS\Webservice\Http\Controller\CarrierController::class . ':carrierList');//->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware(3600));
 $app->get('/api/carriers/available', PS\Webservice\Http\Controller\CarrierController::class . ':availableCarriers');
 $app->get('/api/carriers/{id}', PS\Webservice\Http\Controller\CarrierController::class . ':getCarrier')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware(3600));
+
+/** Configuration service API */
+$app->post('/api/config/cart_rules', PS\Webservice\Http\Controller\ConfigController::class . ':makeCartRulesConfig');

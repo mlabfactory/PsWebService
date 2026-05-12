@@ -58,8 +58,8 @@ class CouponEntity implements ObjectInterface
         $validTo = (string) ($this->data['valid_to'] ?? $this->data['date_to'] ?? '');
 
         $this->data = [
-            'id' => isset($this->data['id']) ?  $this->encodeId($this->data['id'], 'coupon') : null,
-            'code' => isset($this->data['code']) ? (string) $this->data['code'] : '',
+            'id' => isset($this->data['id']) ?  $this->encodeId((int) $this->data['id'], 'coupon') : (int) $this->encodeId((int) $this->data['id_relative'], 'coupon'),
+            'code' => isset($this->data['code']) ? (string) $this->data['code'] : throw new \InvalidArgumentException('Code is required for CouponEntity'),
             'name' => (string) $name,
             'valid_from' => $validFrom,
             'valid_to' => $validTo,

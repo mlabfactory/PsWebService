@@ -11,7 +11,7 @@ class PrestashopConnectorException extends \Exception {
 
     $message = "An error occurrend while connecting to prestashop server ---- ";
     $details = [
-        'error' => $previous->getMessage(),
+        'error' => is_null($previous->getMessage()) ? $service->getBody() : $previous->getMessage(),
         'config' => $service->getConfig()->toArray()
     ];
 

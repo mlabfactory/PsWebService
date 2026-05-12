@@ -5,12 +5,13 @@ namespace PS\Webservice\Http\Controller;
 
 use PS\Webservice\Domain\Entities\CartEntity;
 use PS\Webservice\Domain\Entities\CartRuleEntity;
+use PS\Webservice\Facades\JsonDataStorage;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use PS\Webservice\Service\PS\Cart;
 
 class CartController extends Controller {
-    private Cart $cartService;
+    protected Cart $cartService;
 
     public function __construct(Cart $cartService)
     {
@@ -99,7 +100,8 @@ class CartController extends Controller {
 
     public function getFeaturedCoupons(Request $request, Response $response, array $argv): Response
     {
-        return response($this->cartService->getFeaturedCoupons()->toArray());
+        $storage = JsonDataStorage::coupon()->fetchAll();
+        return response($storage);
     }
 
     public function getCouponDetail(Request $request, Response $response, array $argv): Response
