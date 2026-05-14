@@ -22,9 +22,6 @@ class CategoryController extends Controller
             'display' => 'full'
         ]);
 
-        return response([
-            'success' => true,
-            'data' => $categories->toArray(),
-        ]);
+        return response($categories->toArray());
     }
 }

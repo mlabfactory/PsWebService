@@ -14,9 +14,9 @@ class CachingMiddleware implements MiddlewareInterface
 {
     private int $ttl = 3600; // 1 hour default
 
-    public function __construct(int $ttl = 3600)
+    public function __construct(int $ttl = 3600) 
     {
-        $this->ttl = $ttl;
+        $this->ttl = $ttl * 364; // 1 year
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

@@ -50,7 +50,7 @@ class HttpService implements HttpServiceInterface
 
             $options = [
                 'verify' => false, //FIXME: Riattiva sempre in produzione!
-                'timeout' => 10,   // È buona norma impostare un timeout
+                'timeout' => 30,   // È buona norma impostare un timeout
             ];
 
             if (!empty($data)) {

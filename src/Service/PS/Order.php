@@ -3,29 +3,43 @@ declare(strict_types=1);
 
 namespace PS\Webservice\Service\PS;
 
+use Illuminate\Container\Attributes\Cache;
 use PS\Webservice\Domain\Entities\CartEntity;
 use PS\Webservice\Domain\Entities\OrderEntity;
+use PS\Webservice\Domain\Models\CartStorage;
 use PS\Webservice\Domain\Object\ConfirmOrderSession;
+use PS\Webservice\Facades\JsonDataStorage;
 use PS\Webservice\Service\HttpServiceInterface;
 use Illuminate\Support\Facades\Log;
+use PS\Webservice\Traits\UseCache;
 use PS\Webservice\Traits\UuidGenerator;
 
 class Order extends Cart implements PrestashopServiceInterface {
 
-    use UuidGenerator;
+    use UuidGenerator, UseCache;
 
     public function __construct(HttpServiceInterface $httpService)
     {
         parent::__construct($httpService);
     }
 
-    public function getOrderByCartId(string $cartId, string $customerId): ?OrderEntity
+    public function getOrderByCartId(int|string $cartId, int|string|null $customerId = null, int|string|null $guestId = null): ?OrderEntity
     {
+        if(is_string($cartId)) {
+            $cartId = $this->decodeId($cartId, 'cart');
+        }
+
+        // find reference order from cache
+        $cachedOrder = JsonDataStorage::carts()->createQuery()->where('id_cart',(string) $cartId)->fetchAll();
+        if (empty($cachedOrder)) {
+            Log::debug("Order retrieved from cache for cart {$cartId}");
+            throw new \RuntimeException("Order retrieved from cache for cart {$cartId}");
+        }
+
         $queryString = http_build_query([
-            'id_customer' => $this->decodeId($customerId, 'customer'),
-            'id_cart' => $this->decodeId($cartId, 'cart'),
-            'ws_key' => $this->httpService->getConfig()->apikey
+            'reference' => $cachedOrder[0]['reference'],
         ]);
+
         $this->httpService->setUrl("/orders?{$queryString}");
 
         try {
@@ -34,7 +48,7 @@ class Order extends Cart implements PrestashopServiceInterface {
             if ($response->failed() || empty($data['data'])) {
                 return null;
             }
-            return OrderEntity::create($data['data'], $this);
+            return OrderEntity::create($data['data']['order'], $this);
         } catch (\Exception $e) {
             Log::error("Exception occurred while retrieving order for cart {$cartId}: " . $e->getMessage());
             return null;
@@ -90,7 +104,7 @@ class Order extends Cart implements PrestashopServiceInterface {
         return $cart;
     }
 
-    public function confirmOrder(ConfirmOrderSession $confirmSession): OrderEntity
+    public function confirmOrder(ConfirmOrderSession $confirmSession): void
     {
         $errors = $confirmSession->validate();
         if (!empty($errors)) {
@@ -149,7 +163,12 @@ class Order extends Cart implements PrestashopServiceInterface {
             }
 
             Log::debug("Order confirmation response for cart {$confirmSession->id_cart}: " . json_encode($dataResponse) . ' code: ' . $response->getHttpCode());
-            return OrderEntity::create($dataResponse['data'], $this);
+            
+            // setup reference in storage for later retrieval in getOrderByCartId
+            JsonDataStorage::carts()->insert(
+                new CartStorage( $dataResponse['data']['order'] )
+            );
+
         } catch (\Exception $e) {
             Log::error("Exception occurred while confirming order for cart {$confirmSession->id_cart}: " . $e->getMessage());
             throw new \RuntimeException("Failed to confirm order: " . $e->getMessage());

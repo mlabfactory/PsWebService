@@ -5,6 +5,7 @@ namespace PS\Webservice\Domain\Object;
 
 use PS\Webservice\Domain\Entities\CarrierEntity;
 use PS\Webservice\Domain\Entities\CartRuleEntity;
+use PS\Webservice\Domain\Entities\CustomerEntity;
 use PS\Webservice\Domain\ObjectInterface;
 use PS\Webservice\Service\PS\PrestashopServiceInterface;
 use PS\Webservice\Traits\UuidGenerator;
@@ -42,8 +43,16 @@ class OrderSession implements ObjectInterface
     public function normalizeData(): void
     {
         $data = $this->data;
-        $cartId = $data['cart_id'] ?? null;
+        $cartId = $data['cart_id'] ?? throw new \InvalidArgumentException('cart_id is required to create an order session');
+        /**
+         * @var  CustomerEntity $customer
+         */
+        $customer = $data['customer'];
+        if(! $customer instanceof CustomerEntity) {
+            throw new \InvalidArgumentException('customer must be an instance of CustomerEntity to create an order session');
+        }
 
+        $customerDetails = $customer->toArray();
         $this->data = [
             'mode' => 'payment',
             'success_url' => $this->appendQueryParam($data['success_url'] ?? '', 'cart_id', $cartId),
@@ -51,13 +60,15 @@ class OrderSession implements ObjectInterface
             'line_items' => $data['line_items'] ?? [],
             // Only include IDs with positive integer values; null, empty strings, '0',
             // and negative values are excluded as all PrestaShop entity IDs must be > 0.
-            'metadata' => array_filter([
-                'cart_id' => $cartId,
-                'id_customer' => $data['id_customer'],
-                'id_guest' => $data['id_guest'],
+            'metadata' => [
+                'cart_id' => $this->decodeId($cartId, 'cart'),
+                'id_customer' => $this->decodeId($data['id_customer'], 'customer'),
+                'id_guest' => $this->decodeId($data['id_guest'], 'guest'),
                 'id_carrier' => $data['id_carrier'],
-            ], fn($v) => $v !== null && (int) $v > 0),
+                'customer' => json_encode($customerDetails),
+            ],
         ];
+
     }
 
     /**
@@ -76,7 +87,6 @@ class OrderSession implements ObjectInterface
     public function addLineItem(string $name, int $quantity, float $price, string $type = 'product'): void
     {
         $this->data['line_items'][] = [
-            'type' => $type,
             'price_data' => [
                 'currency' => 'eur',
                 'product_data' => [
@@ -90,7 +100,6 @@ class OrderSession implements ObjectInterface
 
     public function addCartRule(CartRuleEntity $cartRule): void
     {
-        $cartRules = $cartRule->data;
         /** @var Rule $rule */
         foreach($cartRule as $rule) {
             $id = $rule->stripe_id;

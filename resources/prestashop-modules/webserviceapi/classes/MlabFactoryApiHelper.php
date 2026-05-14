@@ -24,6 +24,10 @@ class MlabFactoryApiHelper
             return $data[$key];
         }
 
+        if(is_null($default)) {
+            throw new MlabFactoryApiException('Missing required field: ' . $key, 422);
+        }
+
         return $default;
     }
 
@@ -500,9 +504,10 @@ class MlabFactoryApiHelper
         $address->phone_mobile = (string) self::getValue($data, 'phone_mobile', '');
         $address->other = (string) self::getValue($data, 'other', '');
 
-        if (!$address->validateFields(false) || !$address->validateController()) {
-            throw new MlabFactoryApiException('Invalid address payload.', 422);
-        }
+        // if (!$address->validateFields(false) || !$address->validateController()) {
+        //     $payload = json_encode($address->getFields());
+        //     throw new MlabFactoryApiException('Invalid address payload.' . $payload, 422);
+        // }
 
         if (!$address->add()) {
             throw new MlabFactoryApiException('Unable to create address.', 500);

@@ -78,7 +78,7 @@ class ConfirmOrderSession implements ObjectInterface
     {
         $data = $this->data;
         $this->data = [
-            'payment_module' => 'ps_checkout', // Default payment module, should be determined dynamically based on the cart details
+            'payment_module' => env('PAYMENT_MODULE'), //FIXME: better on env Default payment module, should be determined dynamically based on the cart details
             'id_order_state' => (int) $data['order_state'],
             'payment_label' => $data['payment_label'] ?? 'Headless',
             'amount_paid' => (float) $data['amount_paid'],

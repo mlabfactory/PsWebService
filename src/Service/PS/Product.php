@@ -8,6 +8,7 @@ use PS\Webservice\Domain\Entities\ProductEntity;
 use PS\Webservice\Domain\Models\ProductLangTable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use PS\Webservice\Domain\Object\Filter;
 
 class Product extends PrestashopService implements PrestashopServiceInterface {
 
@@ -30,7 +31,7 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
      *
      * @return Collection The collection of product entities.
      */
-    public function productsList(array $displayOptions = ['display' => 'full']): Collection {
+    public function productsList(array $displayOptions = ['display' => 'full'], ?Filter $filter = null): Collection {
 
         if(!empty($displayOptions)) {
             $queryString = http_build_query($displayOptions);
@@ -71,7 +72,7 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
          * @param int $categoryId The ID of the category to retrieve products from
          * @return Collection A collection of products that belong to the specified category
          */
-        public function getProductByCategory(int $categoryId, array $pagination = []): Collection {
+        public function getProductByCategory(int $categoryId, array $pagination = [], ?Filter $filters = null): Collection {
          $limit = $pagination['limit'] ?? 10;
          $page = $pagination['page'] ?? 1;
          $offset = ($page - 1) * $limit;
@@ -120,12 +121,12 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
             throw new \RuntimeException("Failed to retrieve products for filters: " . $response->getHttpCode());
         }
 
-        if(empty($response->toArray()['filters'])) {
+        if(empty($response->toArray()['data']['filters'])) {
             Log::warning("No filters found for category ID {$categoryId}");
             return null; // No filters found for the category
         }
 
-        $filtersData = $response->toArray()['filters'];
+        $filtersData = $response->toArray()['data']['filters'];
         return FilterEntity::create($filtersData, $this);
 
     }

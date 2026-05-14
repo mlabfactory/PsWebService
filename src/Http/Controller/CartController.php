@@ -52,19 +52,20 @@ class CartController extends Controller {
 
     }
 
-    public function addToCart(Request $request, Response $response, array $argv): Response
+    public function updateCart(Request $request, Response $response, array $argv): Response
     {
         $payload = $request->getParsedBody();
         $cartId = $argv['cartId'];
         $isGuest = (bool) $payload['isGuest'] ?? false;
         $customerId = $payload['customerId'];
+        $operation = $payload['op'];
 
         if (!is_array($payload)) {
             throw new \InvalidArgumentException('Invalid payload format', 400);
         }
 
         //find customerId from cookie session
-        $cart = $this->cartService->updateCart($payload, $cartId, $customerId, $isGuest);
+        $cart = $this->cartService->updateCart($payload, $cartId, $customerId, $isGuest, $operation);
         
         if($cart->failed()) {
             return response([
@@ -72,7 +73,8 @@ class CartController extends Controller {
             ], 500);
         }
 
-        return response($cart->toArray(), 201);
+        $cartEntity = CartEntity::create($cart->toArray()['data']['cart'], $this->cartService);
+        return response($cartEntity->toArray(), 201);
     }
 
     public function createCart(Request $request, Response $response, array $argv): Response
@@ -118,9 +120,9 @@ class CartController extends Controller {
     {
         $code = (string) ($argv['code'] ?? '');
         $cartId = (string) ($argv['cartId'] ?? '');
-        $queryParams = $request->getQueryParams();
-        $customerId = isset($queryParams['customer_id']) ? (string) $queryParams['customer_id'] : null;
-        $guestId = isset($queryParams['guest_id']) ? (string) $queryParams['guest_id'] : null;
+        $params = $request->getParsedBody();
+        $customerId = isset($params['customer_id']) ? (string) $params['customer_id'] : null;
+        $guestId = isset($params['guest_id']) ? (string) $params['guest_id'] : null;
 
         if ($customerId === null && $guestId === null) {
             return response(['error' => 'Either customer_id or guest_id must be provided as a query parameter'], 400);

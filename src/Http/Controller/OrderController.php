@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PS\Webservice\Http\Controller;
 
 use PS\Webservice\Domain\Entities\CartRuleEntity;
+use PS\Webservice\Domain\Entities\CustomerEntity;
 use PS\Webservice\Service\PS\Order;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -46,7 +47,8 @@ class OrderController extends CartController {
     public function confirmOrder(Request $request, Response $response, array $argv): Response
     {
         $payload = $request->getParsedBody();
-        $customerId = $payload['id_customer'];
+        $customerId = $payload['id_customer'] ?? null;
+        $guestId = $payload['id_guest'] ?? null;
 
         if (!is_array($payload)) {
             return response([
@@ -66,7 +68,7 @@ class OrderController extends CartController {
         }
 
         try {
-            $order = $this->orderService->getOrderByCartId($cartId, $customerId);
+            $order = $this->orderService->getOrderByCartId( $cartId, $customerId, $guestId);
             if ($order === null) {
                 return response([
                     'success' => false,
@@ -145,6 +147,16 @@ class OrderController extends CartController {
                 'id_customer' => $payload['id_customer'] ?? null,
                 'id_guest' => $payload['id_guest'] ?? null,
                 'id_carrier' => $carrierId,
+                'customer' => CustomerEntity::create([
+                    'id' => $payload['id_customer'] ?? null,
+                    'email' => $payload['customer']['email'] ?? null,
+                    'firstname' => $payload['customer']['firstname'] ?? null,
+                    'lastname' => $payload['customer']['lastname'] ?? null,
+                    'phone' => $payload['customer']['phone'] ?? null,
+                    'delivery_address' => $payload['delivery_address'] ?? null,
+                    'newsletter' => $payload['customer']['newsletter'] ?? false,
+                    'invoice_address' => $payload['invoice_address'] ?? $payload['delivery_address'],
+                ], $this->orderService)
             ], $this->orderService);
 
             $orderSession->addLineItem(

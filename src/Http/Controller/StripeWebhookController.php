@@ -5,6 +5,7 @@ namespace PS\Webservice\Http\Controller;
 
 use PS\Webservice\Domain\Entities\CustomerEntity;
 use PS\Webservice\Domain\Object\ConfirmOrderSession;
+use PS\Webservice\Domain\Object\OrderSession;
 use PS\Webservice\Service\PS\Order;
 use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -71,16 +72,13 @@ class StripeWebhookController extends Controller
     {
         $metadata = $session->metadata;
         $cartId = isset($metadata->cart_id) ? (int) $metadata->cart_id : 0;
+        $customerId = (int) isset($metadata->id_customer) ? (int) $metadata->id_customer : null;
+        $guestId = (int) isset($metadata->id_guest) ? (int) $metadata->id_guest : null;
+        $carrierId = isset($metadata->id_carrier) ? (int) $metadata->id_carrier : throw new \RuntimeException('Missing id_carrier in Stripe session metadata for cart ' . $cartId);
+        $customerDetails = json_decode($metadata->customer);
 
         if ($cartId <= 0) {
             Log::warning('Stripe webhook: missing or invalid cart_id in metadata for session ' . $session->id);
-            return;
-        }
-
-        // Idempotency: if an order for this cart already exists, skip processing
-        $existingOrder = $this->orderService->getOrderByCartId($cartId);
-        if ($existingOrder !== null) {
-            Log::info('Stripe webhook: order for cart ' . $cartId . ' already confirmed, skipping');
             return;
         }
 
@@ -99,55 +97,44 @@ class StripeWebhookController extends Controller
             throw new \RuntimeException('Invalid amount_total in Stripe session ' . $session->id);
         }
 
-        $idCustomer = isset($metadata->id_customer) ? (int) $metadata->id_customer : null;
-        $idGuest = isset($metadata->id_guest) ? (int) $metadata->id_guest : null;
-        $idCarrier = isset($metadata->id_carrier) && (int) $metadata->id_carrier > 0
-            ? (int) $metadata->id_carrier
-            : null;
-
-        if ($idCarrier === null) {
+        if ($carrierId === null) {
             Log::error('Stripe webhook: missing id_carrier in metadata for session ' . $session->id . ', cart ' . $cartId);
             throw new \RuntimeException('Missing id_carrier in Stripe session metadata for cart ' . $cartId);
         }
 
-        $customerDetails = $session->customer_details;
-        $email = $customerDetails->email ?? '';
-
-        // Note: Stripe provides customer_details.name as a single string.
-        // We split on the first space to derive firstname/lastname. For names that do
-        // not follow the Western "Firstname Lastname" format the full name is placed in
-        // firstname and lastname is left empty.
-        $fullName = trim($customerDetails->name ?? '');
-        $spacePos = strpos($fullName, ' ');
-        if ($spacePos !== false) {
-            $firstname = substr($fullName, 0, $spacePos);
-            $lastname = trim(substr($fullName, $spacePos + 1));
-        } else {
-            $firstname = $fullName;
-            $lastname = '';
-        }
-
-        $confirmSession = ConfirmOrderSession::create([
-            'id_cart' => $cartId,
-            'order_state' => ConfirmOrderSession::ORDER_STATE['payment_success'],
-            'payment_label' => 'Stripe',
-            'amount_paid' => $amountPaid,
-            'id_customer' => $idCustomer,
-            'id_guest' => $idGuest,
-            'id_carrier' => $idCarrier,
-            'create_account' => false,
-        ], $this->orderService);
+        $email = $customerDetails->email;
+        $firstname = $customerDetails->firstname;
+        $lastname = $customerDetails->lastname;
+        
+        // finalize the order with a "payment_success" state. This will trigger the creation of the order in PrestaShop.
+        $confirmSession = ConfirmOrderSession::create(
+                [
+                    'id_cart' => $cartId,
+                    'id_customer' => $customerId,
+                    'id_guest' => $guestId,
+                    'order_state' => ConfirmOrderSession::ORDER_STATE['confirm'],
+                    'amount_paid' => ($session->amount_total) / 100,
+                    'create_account' => false, //FIXME: no account creation data from Stripe, default to false
+                    'id_carrier' => $carrierId,
+                ],
+                $this->orderService
+            );
 
         $confirmSession->setCustomer(
             CustomerEntity::create([
+                'id' => null,
                 'email' => $email,
                 'firstname' => $firstname,
                 'lastname' => $lastname,
-                'newsletter' => false,
+                'phome' => $customerDetails->phone ?? null,
+                'delivery_address' => (array) $customerDetails->delivery_address, //FIXME: no address data from Stripe, set to null
+                'newsletter' => false, //FIXME: no newsletter subscription data from Stripe, default to false
             ], $this->orderService)
         );
 
+
         $this->orderService->confirmOrder($confirmSession);
+
         Log::info('Stripe webhook: order confirmed for cart ' . $cartId);
     }
 }

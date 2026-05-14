@@ -6,8 +6,6 @@ if (!defined('_PS_VERSION_')) {
 class webserviceapi extends Module
 {
     const CONFIG_PAYMENT_MODULE = 'MLABFACTORYAPI_PAYMENT_MODULE';
-    const CONFIG_ORDER_STATE = 'MLABFACTORYAPI_ORDER_STATE';
-
     public function __construct()
     {
         $this->name = 'webserviceapi';
@@ -28,14 +26,12 @@ class webserviceapi extends Module
     {
         return parent::install()
             && $this->registerHook('moduleRoutes')
-            && Configuration::updateValue(self::CONFIG_PAYMENT_MODULE, $this->getDefaultPaymentModule())
-            && Configuration::updateValue(self::CONFIG_ORDER_STATE, (int) Configuration::get('PS_OS_PREPARATION'));
+            && Configuration::updateValue(self::CONFIG_PAYMENT_MODULE, $this->getDefaultPaymentModule());
     }
 
     public function uninstall()
     {
         return Configuration::deleteByName(self::CONFIG_PAYMENT_MODULE)
-            && Configuration::deleteByName(self::CONFIG_ORDER_STATE)
             && parent::uninstall();
     }
 
@@ -45,15 +41,11 @@ class webserviceapi extends Module
 
         if (Tools::isSubmit('submitMlabFactoryApi')) {
             $paymentModule = trim((string) Tools::getValue(self::CONFIG_PAYMENT_MODULE));
-            $orderState = (int) Tools::getValue(self::CONFIG_ORDER_STATE);
 
             if ($paymentModule === '') {
                 $output .= $this->displayError($this->l('Payment module technical name is required.'));
-            } elseif ($orderState <= 0) {
-                $output .= $this->displayError($this->l('A valid order state is required.'));
             } else {
                 Configuration::updateValue(self::CONFIG_PAYMENT_MODULE, $paymentModule);
-                Configuration::updateValue(self::CONFIG_ORDER_STATE, $orderState);
                 $output .= $this->displayConfirmation($this->l('Settings updated.'));
             }
         }
@@ -130,17 +122,6 @@ class webserviceapi extends Module
                         'required' => true,
                         'desc' => $this->l('Used when the API finalizes an order, for example ps_wirepayment.'),
                     ),
-                    array(
-                        'type' => 'select',
-                        'label' => $this->l('Default order state'),
-                        'name' => self::CONFIG_ORDER_STATE,
-                        'required' => true,
-                        'options' => array(
-                            'query' => OrderState::getOrderStates($this->context->language->id),
-                            'id' => 'id_order_state',
-                            'name' => 'name',
-                        ),
-                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
@@ -159,7 +140,6 @@ class webserviceapi extends Module
         $helper->submit_action = 'submitMlabFactoryApi';
         $helper->fields_value = array(
             self::CONFIG_PAYMENT_MODULE => (string) Configuration::get(self::CONFIG_PAYMENT_MODULE),
-            self::CONFIG_ORDER_STATE => (int) Configuration::get(self::CONFIG_ORDER_STATE),
         );
 
         return $helper->generateForm(array($fieldsForm));

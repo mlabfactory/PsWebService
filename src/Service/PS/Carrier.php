@@ -39,14 +39,7 @@ class Carrier extends PrestashopService implements PrestashopServiceInterface {
         $collection = new Collection();
         $carriers = $response->toArray()['carriers'] ?? [];
         
-        $carrierConfigurations = $this->getCarrierConfigurations();
         foreach ($carriers as $carrierData) {
-            foreach ($carrierConfigurations as $config) {
-                if ($config['id_carrier'] === (int)$carrierData['id']) {
-                    $carrierData = array_merge($carrierData, $config);
-                    break;
-                }
-            }
             $collection->push(CarrierEntity::create($carrierData, $this));
         }
 
@@ -104,7 +97,7 @@ class Carrier extends PrestashopService implements PrestashopServiceInterface {
 
     private function getCarrierConfigurations(): array
     {
-        $configurations = file_get_contents(storage_path('configs/carriers.json'));
+        $configurations = file_get_contents(storage_path('configs/carrier.json'));
 
         if (empty($configurations)) {
             throw new \RuntimeException("Failed to retrieve carrier configurations: ");

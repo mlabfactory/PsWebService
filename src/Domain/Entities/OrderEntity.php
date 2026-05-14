@@ -59,7 +59,12 @@ class OrderEntity implements ObjectInterface
 
 	public function normalizeData(): void
 	{
-		$customer = CustomerEntity::create($this->data['order']['customer'], $this->service);
+		$this->data['customer']['delivery_address'] = $this->data['delivery_address'];
+		$this->data['customer']['invoice_address'] = $this->data['invoice_address'];
+		$this->data['customer']['phone'] = $this->data['customer']['phone_mobile'] ?? null; //FIXME: phone_mobile is used as a fallback for phone, but ideally should be determined based on the customer data
+
+				// normalize customer data
+		$customer = CustomerEntity::create($this->data['customer'], $this->service);
 		$this->data = [
 			'id' => $this->encodeId($this->data['id'], 'order'),
 			'reference' => (string) $this->data['reference'],
@@ -69,7 +74,7 @@ class OrderEntity implements ObjectInterface
 			'total_paid_tax_incl' => (float) $this->data['total_paid_tax_incl'],
 			'total_paid_tax_excl' => (float) $this->data['total_paid_tax_excl'],
 			'customer' => $customer->toArray(),
-			'id_lang' => (int) $this->data['id_lang'],
+			'id_lang' => $this->data['id_lang'] ?? null, //FIXME: id_lang is not always present in the order data, should be determined based on the customer or cart data
 		];
 	}
 

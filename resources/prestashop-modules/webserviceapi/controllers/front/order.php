@@ -66,7 +66,7 @@ class webserviceapiorderModuleFrontController extends MlabFactoryApiBaseModuleFr
 
         $paymentModuleName = (string) MlabFactoryApiHelper::getValue($payload, 'payment_module', Configuration::get(webserviceapi::CONFIG_PAYMENT_MODULE));
         $paymentModule = MlabFactoryApiHelper::resolvePaymentModule($paymentModuleName);
-        $orderStateId = (int) MlabFactoryApiHelper::getValue($payload, 'id_order_state', Configuration::get(webserviceapi::CONFIG_ORDER_STATE));
+        $orderStateId = (int) MlabFactoryApiHelper::getValue($payload, 'id_order_state');
         $paymentLabel = (string) MlabFactoryApiHelper::getValue($payload, 'payment_label', $paymentModule->displayName);
         $amountPaid = (float) MlabFactoryApiHelper::getValue($payload, 'amount_paid', $cart->getOrderTotal(true, Cart::BOTH));
 
@@ -168,8 +168,7 @@ class webserviceapiorderModuleFrontController extends MlabFactoryApiBaseModuleFr
             'SELECT `id_order`
             FROM `' . _DB_PREFIX_ . 'orders`
             WHERE `reference` = \'' . pSQL($reference) . '\'
-            ORDER BY `id_order` DESC
-            LIMIT 1'
+            ORDER BY `id_order` DESC'
         );
 
         if ($orderId <= 0) {

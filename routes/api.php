@@ -14,11 +14,11 @@ $app->get('/api/product/{slug}', PS\Webservice\Http\Controller\ProductController
 $app->get('/api/cart/list/{customerId}', PS\Webservice\Http\Controller\CartController::class . ':cartList');
 $app->get('/api/cart/{cartId}', PS\Webservice\Http\Controller\CartController::class . ':getCart');
 $app->post('/api/cart', PS\Webservice\Http\Controller\CartController::class . ':createCart');
-$app->post('/api/cart/{cartId}', PS\Webservice\Http\Controller\CartController::class . ':addToCart');
+$app->post('/api/cart/{cartId}', PS\Webservice\Http\Controller\CartController::class . ':updateCart');
 $app->get('/api/cart-rules', PS\Webservice\Http\Controller\CartController::class . ':getCartRules');
 $app->get('/api/cart-rules/coupon/featured', PS\Webservice\Http\Controller\CartController::class . ':getFeaturedCoupons');
 $app->get('/api/cart-rules/coupon/{code}', PS\Webservice\Http\Controller\CartController::class . ':getCouponDetail');
-$app->get('/api/cart-rules/coupon/{code}/validate/{cartId}', PS\Webservice\Http\Controller\CartController::class . ':validateCoupon');
+$app->post('/api/cart-rules/coupon/{code}/validate/{cartId}', PS\Webservice\Http\Controller\CartController::class . ':validateCoupon');
 
 /** Customer api */
 $app->post('/api/register', PS\Webservice\Http\Controller\CustomerController::class . ':register');
@@ -32,7 +32,7 @@ $app->post('/api/order', PS\Webservice\Http\Controller\OrderController::class . 
 $app->post('/api/order/confirm', PS\Webservice\Http\Controller\OrderController::class . ':confirmOrder');
 
 /** Stripe webhook */
-$app->post('/api/webhooks/stripe', PS\Webservice\Http\Controller\StripeWebhookController::class . ':handleWebhook');
+$app->post('/api/webhooks/stripe/checkout', PS\Webservice\Http\Controller\StripeWebhookController::class . ':handleWebhook');
 
 /** Carriers api */
 $app->get('/api/carriers', PS\Webservice\Http\Controller\CarrierController::class . ':carrierList');//->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware(3600));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PS\Webservice\Domain\Entities;
 
 use PS\Webservice\Domain\Enums\ImageTail;
+use PS\Webservice\Domain\Object\Filter;
 use PS\Webservice\Domain\ObjectInterface;
 use PS\Webservice\Service\PS\PrestashopServiceInterface;
 use PS\Webservice\Traits\ProductBuilder;
@@ -77,7 +78,7 @@ class ProductEntity implements ObjectInterface
     public function normalizeData(): void
     {
         unset($this->data['associations']['product_option_values']);
-        $this->data['url'] = str_replace('https://www.dolcezampa.com', '', $this->data['url']); //FIXME: remove these on production
+        $this->data['url'] = isset($this->data['url']) ? str_replace('https://www.dolcezampa.com', '', $this->data['url']) : null; //FIXME: remove these on production
         $this->buildImageLink([ImageTail::ORIGINAL]);
         $this->buildCombinations();
         $this->buildProductFeatures();

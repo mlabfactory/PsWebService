@@ -25,10 +25,7 @@ class CarrierController extends Controller
         try {
             $carriers = $this->carrierService->carriersList();
             
-            return response([
-                'success' => true,
-                'data' => $carriers->toArray()
-            ]);
+            return response($carriers->toArray());
         } catch (\Exception $e) {
             return response([
                 'success' => false,

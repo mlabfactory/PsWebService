@@ -23,7 +23,7 @@ class FilterEntity implements ObjectInterface
 
     public static function create(array $data, PrestashopServiceInterface $service): self
     {
-        if (empty(array_diff(self::MUST_HAVE_KEYS, array_keys($data)))) {
+        if (!empty(array_diff(self::MUST_HAVE_KEYS, array_keys($data)))) {
             throw new \InvalidArgumentException('Missing required keys: ' . implode(', ', array_diff(self::MUST_HAVE_KEYS, array_keys($data))));
         }
 
@@ -78,8 +78,10 @@ class FilterEntity implements ObjectInterface
     private function normalizeFeatureValues(array $feature, string $type): array
     {
         $materials = [];
+        $object = [];
         foreach ($feature as $key => $data) {
             if ($data['name'] == $type) {
+                $object = $feature[$key];
                 foreach ($data['values'] as $value) {
                     $materials[] = [
                         "id_feature_value" => (int) $value['id_feature_value'],
@@ -90,9 +92,9 @@ class FilterEntity implements ObjectInterface
         }
 
         return [
-            'id_feature' => (int) $feature['id_feature'],
-            'name' => (int) $feature['name'],
-            'type' => (int) $feature['type'],
+            'id_feature' => (int) $object['id_feature'],
+            'name' => (int) $object['name'],
+            'type' => (int) $object['type'],
             'values' => $materials,
         ];
     }
@@ -100,8 +102,10 @@ class FilterEntity implements ObjectInterface
     private function normalizeAttributeValues(array $attribute, string $type): array
     {
         $typeAttribute = [];
+        $object = [];
         foreach ($attribute as $key => $data) {
             if ($data['name'] == $type) {
+                $object = $attribute[$key];
                 foreach ($data['values'] as $value) {
                     $typeAttribute[] = [
                         "id_attribute" => (int) $value['id_attribute'],
@@ -112,9 +116,9 @@ class FilterEntity implements ObjectInterface
         }
 
         return [
-            'id_attribute_group' => (int) $attribute['id_attribute_group'],
-            'name' => (int) $attribute['name'],
-            'type' => (int) $attribute['type'],
+            'id_attribute_group' => (int) $object['id_attribute_group'],
+            'name' => (int) $object['name'],
+            'type' => (int) $object['type'],
             'values' => $typeAttribute,
         ];
     }

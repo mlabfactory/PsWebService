@@ -16,4 +16,9 @@ final class JsonDataStorage
     {
         return new DbService('coupons');
     }
+
+    public static function carts(): DbService
+    {
+        return new DbService('carts');
+    }
 }

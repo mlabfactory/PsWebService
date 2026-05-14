@@ -107,8 +107,9 @@ class webserviceapicartModuleFrontController extends MlabFactoryApiBaseModuleFro
             $combinationId = (int) MlabFactoryApiHelper::getValue($productLine, 'id_product_attribute', 0);
             $customizationId = (int) MlabFactoryApiHelper::getValue($productLine, 'id_customization', 0);
             $deliveryAddressId = $cart->id_address_delivery ? (int) $cart->id_address_delivery : 0;
+            $operation = MlabFactoryApiHelper::getValue($productLine, 'op');
 
-            $updated = $cart->updateQty($quantity, $productId, $combinationId, $customizationId, 'up', $deliveryAddressId, null, true, true);
+            $updated = $cart->updateQty($quantity, $productId, $combinationId, $customizationId, $operation, $deliveryAddressId, null, true, true);
             if ($updated <= 0) {
                 throw new MlabFactoryApiException('Unable to add product to cart.', 422, array('product' => $productLine));
             }

@@ -129,7 +129,7 @@ class Cart extends Carrier implements PrestashopServiceInterface {
      * @param string $customerId
      * @return HttpServiceInterface
      */
-    public function updateCart(array $product, string $cartId, string $customerId, bool $isGuest = false): HttpServiceInterface
+    public function updateCart(array $product, string $cartId, string $customerId, bool $isGuest = false, string $op = 'up'): HttpServiceInterface
     {
         $type = $isGuest ? 'guest' : 'customer';
         $customerId = $this->decodeId($customerId, $type);
@@ -141,7 +141,8 @@ class Cart extends Carrier implements PrestashopServiceInterface {
         $products = [
             'id_product' => (int) $product['productId'],
             'id_product_attribute' => (int) $product['productAttributeId'],
-            'quantity' => (int) $product['qty'] ?? 1
+            'quantity' => (int) $product['qty'] ?? 1,
+            'op' => $op
         ];
 
         if($isGuest) {
@@ -164,11 +165,12 @@ class Cart extends Carrier implements PrestashopServiceInterface {
             ]);
         } catch (\Exception $e) {
             Log::error("Exception occurred while updating cart for customer {$payload->getId()}" . $e->getMessage());
+            throw new PrestashopConnectorException($this->httpService, $e);
         }
 
         if($response->failed()) {
             Log::error("Failed to update cart for customer {$payload->getId()}, code:" . $response->getHttpCode() . ", body: " . $response->getBody());
-            return $response;
+            throw new PrestashopConnectorException($response);
         }
 
         return $response;

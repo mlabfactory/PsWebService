@@ -54,24 +54,7 @@ class CustomerEntity implements ObjectInterface
 
 	public function normalizeData(): void
 	{
-        if (isset($this->data['customer']) && is_array($this->data['customer'])) {
-            $this->data = [
-                'customer' => $this->normalizeCustomerPayload($this->data['customer']),
-            ];
-
-            return;
-        }
-
-        if (!array_key_exists('id', $this->data)) {
-            throw new \InvalidArgumentException('Customer data must contain an id field');
-        }
-        $this->data['id'] = $this->encodeId($this->data['id'], 'customer');
-
-        if (array_key_exists('newsletter', $this->data)) {
-            $this->data['newsletter'] = (bool) $this->data['newsletter'];
-        }
-
-        $this->data['invoice_address'] = $this->data['invoice_address'] ?? $this->data['delivery_address'] ?? null;
+            $this->data = $this->normalizeCustomerPayload($this->data);
 	}
 
     /**
@@ -81,13 +64,15 @@ class CustomerEntity implements ObjectInterface
     private function normalizeCustomerPayload(array $customer): array
     {
         $normalized = [
-            'email' => (string) ($customer['email'] ?? ''),
-            'password' => (string) ($customer['password'] ?? ''),
-            'firstname' => (string) ($customer['firstname'] ?? ''),
-            'lastname' => (string) ($customer['lastname'] ?? ''),
-            'newsletter' => (bool) ($customer['newsletter'] ?? false),
+            'email' => (string) $customer['email'],
+            'password' => (string) isset($customer['password']) ? $customer['password'] : '', //FIXME: generate a random password if not provided, to allow account creation from the order confirmation page
+            'firstname' => (string) $customer['firstname'],
+            'lastname' => (string) $customer['lastname'],
+            'phone' => (string) $customer['phone'],
+            'newsletter' => (bool) $customer['newsletter'],
         ];
 
+        $customer['delivery_address']['phone_mobile'] = $customer['phone'] ?? null;
         if (isset($customer['delivery_address']) && is_array($customer['delivery_address'])) {
             $normalized['delivery_address'] = $this->normalizeDeliveryAddress($customer['delivery_address']);
         }
@@ -95,8 +80,10 @@ class CustomerEntity implements ObjectInterface
         if (isset($customer['invoice_address']) && is_array($customer['invoice_address'])) {
             $normalized['invoice_address'] = $this->normalizeDeliveryAddress($customer['invoice_address']);
         } else {
-            $normalized['invoice_address'] = $normalized['delivery_address'] ?? null;
+            $normalized['invoice_address'] = null;
         }
+
+        $normalized['invoice_address'] = null;
 
         return $normalized;
     }
@@ -109,11 +96,14 @@ class CustomerEntity implements ObjectInterface
     {
         return [
             'alias' => (string) ($deliveryAddress['alias'] ?? 'home'),
-            'address1' => (string) $deliveryAddress['address1'],
+            'firstname' => (string) $this->data['firstname'],
+            'lastname' => (string) $this->data['lastname'],
+            'address1' => (string) trim(str_replace("\xc2\xa0", ' ', str_replace(',', ' ', $deliveryAddress['address1']))),
             'city' => (string) $deliveryAddress['city'],
             'postcode' => (string) $deliveryAddress['postcode'],
             'id_country' => 10, //FIXME: Default country ID should be determined dynamically based on the delivery address details
-            'phone_mobile' => (string) ($deliveryAddress['phone_mobile'] ?? ''),
+            'phone_mobile' => (string) ($this->data['phone'] ?? ''),
+            'id_state' => 228, //FIXME: State ID should be determined dynamically based on the delivery address details
         ];
     }
 

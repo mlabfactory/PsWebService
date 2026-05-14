@@ -51,6 +51,12 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * Retrive a category page products
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     */
     public function productByCategory(Request $request, Response $response)
     {
         $category = $request->getQueryParams()['category'] ?? null;
@@ -79,10 +85,11 @@ class ProductController extends Controller
         );
 
         // build filers
-        $response['filters'] = $this->productService->buildFiltersProducts($categoryId);
+        $response['filters'] = $this->productService->buildFiltersProducts($categoryId)->toArray();
         return response([
             'products' => $response['data'],
             'pagination' => $response['pagination'],
+            'filters' => $response['filters']
         ]);
     }
 

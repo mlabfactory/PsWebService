@@ -20,7 +20,7 @@ final class Carrier
     public function normalizeData(array $toDecode = []): void
     {
         $carrier = [
-            'id' => $this->data['id_relative'],
+            'id' => isset($this->data['id_relative']) ? $this->data['id_relative'] : $this->data['id'],
             'name' => $this->data['name'],
             'delay' => $this->data['delay'],
             'grade' => $this->data['grade'],
