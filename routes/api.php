@@ -28,6 +28,7 @@ $app->get('/api/manufacturers/{id}', PS\Webservice\Http\Controller\BrandControll
 /** Customer api */
 $app->post('/api/register', PS\Webservice\Http\Controller\CustomerController::class . ':register');
 $app->post('/api/login', PS\Webservice\Http\Controller\CustomerController::class . ':login');
+$app->post('/api/contact', PS\Webservice\Http\Controller\CustomerController::class . ':contact');
 $app->post('/api/customers', PS\Webservice\Http\Controller\CustomerController::class . ':createCustomer');
 
 /** Order api */

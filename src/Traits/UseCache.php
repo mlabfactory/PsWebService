@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Cache;
 trait UseCache
 {
 
+    private array $tags = [];
+
     protected function getFromCache(string $key): mixed
     {
         $key = sha1($key);
@@ -19,10 +21,25 @@ trait UseCache
         return null;
     }
 
-    protected function setToCache(string $key, mixed $value, int $ttl = 1440): void
+    protected function tags(string|array $tags): self
+    {
+        if (is_string($tags)) {
+            $tags = [$tags];
+        }
+
+        $this->tags = array_merge($this->tags, $tags);
+        return $this;
+    }
+
+    protected function setToCache(string $key, mixed $value, ?int $ttl = 1440): void
     {
         $key = sha1($key);
-        Cache::put($key, $value, Carbon::now()->addMinutes($ttl));
+        if($ttl === null) {
+            Cache::forever($key, $value);
+        } else {
+            $expiresAt = Carbon::now()->addMinutes($ttl);
+            Cache::put($key, $value, $expiresAt);
+        }
     }
 
     protected function removeFromCache(string $key): void

@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace PS\Webservice\Service;
 
-use PS\Webservice\Domain\Object\PayloadServiceData;
-use PS\Webservice\Domain\Object\WebserviceConfig;
-use PS\Webservice\Service\HttpServiceInterface;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use PS\Webservice\Domain\Models\RequestStorage;
+use PS\Webservice\Domain\Object\PayloadServiceData;
+use PS\Webservice\Domain\Object\WebserviceConfig;
+use PS\Webservice\Facades\JsonDataStorage;
+use PS\Webservice\Service\HttpServiceInterface;
 use PS\Webservice\Traits\UseCache;
 use Slim\Http\Interfaces\ResponseInterface;
 
@@ -58,8 +60,9 @@ class HttpService implements HttpServiceInterface
                 $options['json'] = $data;
             }
 
-            Log::debug("Invoking HTTP request: {$method} {$this->api} with data: " . json_encode($data));
+            Log::debug("HTTP request: {$method} {$this->api} with data: " . json_encode($data));
             $response = $stream->request($method, $this->api, $options);
+            $this->saveRequest($method, $this->api, $data);
 
             $this->response = $response;
             $this->body = $response->getBody()->getContents();
@@ -133,5 +136,17 @@ class HttpService implements HttpServiceInterface
     public function getConfig(): WebserviceConfig
     {
         return $this->config;
+    }
+
+    private function saveRequest(string $method, string $url, array $data): void
+    {
+        $requestData = [
+            'method' => $method,
+            'url' => $url,
+            'data' => $data,
+            'timestamp' => time(),
+        ];
+
+        JsonDataStorage::httpRequest()->insert(new RequestStorage($requestData));
     }
 }

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace PS\Webservice\Http\Middleware;
 
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use PS\Webservice\Traits\UseCache;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -12,11 +12,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class CachingMiddleware implements MiddlewareInterface
 {
-    private int $ttl = 3600; // 1 hour default
+    use UseCache;
+    private ?int $ttl;
 
-    public function __construct(int $ttl = 3600) 
+    public function __construct(?int $ttl = null) 
     {
-        $this->ttl = $ttl * 364; // 1 year
+        $this->ttl = $ttl;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -39,8 +40,8 @@ class CachingMiddleware implements MiddlewareInterface
         }
 
         // Try to get from cache
-        if (Cache::has($cacheKey) && $skipCache === false) {
-            $cachedData = Cache::get($cacheKey);
+        if ($this->existsInCache($cacheKey) && $skipCache === false) {
+            $cachedData = $this->getFromCache($cacheKey);
             
             if (is_string($cachedData)) {
                 $decoded = json_decode($cachedData, true);
@@ -64,7 +65,7 @@ class CachingMiddleware implements MiddlewareInterface
         // Cache only successful responses
         if ($response->getStatusCode() >= 200 && $response->getStatusCode() <= 300) {
             $body = $response->getBody()->__toString();
-            Cache::put($cacheKey, $body, $this->ttl);
+            $this->setToCache($cacheKey, $body, $this->ttl);
             
             return $response->withHeader('X-Cache', 'MISS')
                            ->withHeader('X-Cache-Key', substr($cacheKey, 0, 16) . '...');

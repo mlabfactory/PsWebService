@@ -21,4 +21,9 @@ final class JsonDataStorage
     {
         return new DbService('carts');
     }
+
+    public static function httpRequest(): DbService
+    {
+        return new DbService('requests');
+    }
 }

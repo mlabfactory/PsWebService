@@ -3,7 +3,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class webserviceapi extends Module
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+
+class webserviceapi extends PaymentModule
 {
     const CONFIG_PAYMENT_MODULE = 'MLABFACTORYAPI_PAYMENT_MODULE';
     public function __construct()
@@ -26,6 +28,8 @@ class webserviceapi extends Module
     {
         return parent::install()
             && $this->registerHook('moduleRoutes')
+            && $this->registerHook('paymentOptions')
+            && $this->registerHook('paymentReturn')
             && Configuration::updateValue(self::CONFIG_PAYMENT_MODULE, $this->getDefaultPaymentModule());
     }
 
@@ -103,7 +107,62 @@ class webserviceapi extends Module
                 'controller' => 'product',
                 'params' => $params,
             ),
+            'module-webserviceapi-contact' => array(
+                'rule' => 'api/contact',
+                'keywords' => array(),
+                'controller' => 'contact',
+                'params' => $params,
+            ),
+            'module-webserviceapi-wishlist' => array(
+                'rule' => 'api/wishlists',
+                'keywords' => array(),
+                'controller' => 'wishlist',
+                'params' => $params,
+            ),
         );
+    }
+
+    public function hookPaymentOptions($params)
+    {
+        if (!$this->active) {
+            return array();
+        }
+
+        $cart = isset($params['cart']) && Validate::isLoadedObject($params['cart']) ? $params['cart'] : null;
+        if (!$cart || !(int) $cart->id) {
+            return array();
+        }
+
+        $paymentOption = new PaymentOption();
+        $paymentOption->setModuleName($this->name);
+        $paymentOption->setCallToActionText($this->l('Pagamento personalizzato API'));
+        $paymentOption->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true));
+        $paymentOption->setAdditionalInformation('');
+
+        return array($paymentOption);
+    }
+
+    public function hookPaymentReturn($params)
+    {
+        return '';
+    }
+
+    public function getDefaultOrderStateId()
+    {
+        $candidates = array(
+            (int) Configuration::get('PS_OS_PREPARATION'),
+            (int) Configuration::get('PS_OS_BANKWIRE'),
+            (int) Configuration::get('PS_OS_CHEQUE'),
+            (int) Configuration::get('PS_OS_PAYMENT'),
+        );
+
+        foreach ($candidates as $candidate) {
+            if ($candidate > 0) {
+                return $candidate;
+            }
+        }
+
+        return 0;
     }
 
     protected function renderConfiguration()
@@ -161,7 +220,7 @@ class webserviceapi extends Module
 
     protected function getDefaultPaymentModule()
     {
-        $candidates = array('ps_wirepayment', 'bankwire', 'ps_checkpayment', 'checkpayment', 'ps_cashondelivery', 'cashondelivery');
+        $candidates = array($this->name, 'ps_wirepayment', 'bankwire', 'ps_checkpayment', 'checkpayment', 'ps_cashondelivery', 'cashondelivery');
 
         foreach ($candidates as $candidate) {
             if (Module::isInstalled($candidate)) {

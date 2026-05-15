@@ -29,6 +29,14 @@ class Customer extends PrestashopService implements PrestashopServiceInterface
     }
 
     /**
+     * @param array<string, mixed> $payload
+     */
+    public function contact(array $payload): HttpServiceInterface
+    {
+        return $this->post('/contact', $payload, 'send contact request', $payload['email'] ?? null);
+    }
+
+    /**
      * @param array<string, mixed>|CustomerEntity $payload
      */
     private function post(string $url, array|CustomerEntity $payload, string $action, ?string $email = null): HttpServiceInterface

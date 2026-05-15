@@ -42,7 +42,7 @@ class Product extends PrestashopService implements PrestashopServiceInterface
 
         if (!empty($displayOptions)) {
             $queryString = http_build_query($displayOptions);
-            $this->httpService->setUrl("/products?{$queryString}");
+            $this->httpService->setUrl("/products?{$queryString}&price[original_price][use_tax]=1&price[original_price][use_reduction]=1");
         } else {
             $this->httpService->setUrl("/products");
         }
@@ -58,7 +58,7 @@ class Product extends PrestashopService implements PrestashopServiceInterface
         $collection = new Collection();
         $products = $response->toArray()['products'] ?? [];
         foreach ($products as $productData) {
-            if(!is_null($filter) && $filter->match($productData)) {
+            if(!is_null($filter) && $filter->match($productData) !== true) {
                 continue; // Skip products that do not match the filter criteria
             }
             $collection->push(ProductEntity::create($productData, $this));
@@ -129,7 +129,7 @@ class Product extends PrestashopService implements PrestashopServiceInterface
             return null; // Product not found
         }
 
-        $this->httpService->setUrl("/products/{$productId}?display=full");
+        $this->httpService->setUrl("/products/{$productId}?price[original_price][use_tax]=1&price[original_price][use_reduction]=1&display=full");
         $response = $this->httpService->invoke('GET');
 
         if ($response->failed()) {

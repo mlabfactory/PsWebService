@@ -1,0 +1,7 @@
+*.log
+*.json
+resources/*
+docs/*
+Test/*
+php/*
+docker-compose.*

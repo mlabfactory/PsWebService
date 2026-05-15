@@ -47,6 +47,16 @@ class CustomerController extends Controller
         return $this->buildServiceResponse($loginResponse);
     }
 
+    public function contact(Request $request, Response $response, array $argv): Response
+    {
+        $payload = $this->requireArrayPayload($request->getParsedBody());
+        $this->validateContactPayload($payload);
+
+        $contactResponse = $this->customerService->contact($payload);
+
+        return $this->buildServiceResponse($contactResponse, 201);
+    }
+
     protected function validateCustomerPayload(array $payload): bool
     {
         if (!isset($payload['customer']) || !is_array($payload['customer'])) {
@@ -104,6 +114,45 @@ class CustomerController extends Controller
 
         if (!is_string($payload['password']) || trim($payload['password']) === '') {
             throw new \InvalidArgumentException('Field password must be a non-empty string', 400);
+        }
+
+        return true;
+    }
+
+    protected function validateContactPayload(array $payload): bool
+    {
+        foreach (['email', 'message'] as $field) {
+            if (!array_key_exists($field, $payload)) {
+                throw new \InvalidArgumentException("Missing required field: {$field}", 400);
+            }
+        }
+
+        if (!is_string($payload['email']) || trim($payload['email']) === '') {
+            throw new \InvalidArgumentException('Field email must be a non-empty string', 400);
+        }
+
+        if (filter_var($payload['email'], FILTER_VALIDATE_EMAIL) === false) {
+            throw new \InvalidArgumentException('Field email must be a valid email address', 400);
+        }
+
+        if (!is_string($payload['message']) || trim($payload['message']) === '') {
+            throw new \InvalidArgumentException('Field message must be a non-empty string', 400);
+        }
+
+        if (isset($payload['subject']) && (!is_string($payload['subject']) || trim($payload['subject']) === '')) {
+            throw new \InvalidArgumentException('Field subject must be a non-empty string when provided', 400);
+        }
+
+        foreach (['firstname', 'lastname'] as $field) {
+            if (isset($payload[$field]) && (!is_string($payload[$field]) || trim($payload[$field]) === '')) {
+                throw new \InvalidArgumentException("Field {$field} must be a non-empty string when provided", 400);
+            }
+        }
+
+        foreach (['id_contact', 'id_customer', 'id_order'] as $field) {
+            if (isset($payload[$field]) && (!is_int($payload[$field]) || $payload[$field] <= 0)) {
+                throw new \InvalidArgumentException("Field {$field} must be a positive integer when provided", 400);
+            }
         }
 
         return true;
