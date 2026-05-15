@@ -29,7 +29,7 @@ class webserviceapiloginModuleFrontController extends MlabFactoryApiBaseModuleFr
         $this->getCustomerContext($customer);
 
         $addresses = array();
-        foreach (Address::getAddresses((int) $this->context->language->id, (int) $customer->id) as $addressData) {
+        foreach ($customer->getAddresses((int) $this->context->language->id) as $addressData) {
             $address = new Address((int) $addressData['id_address']);
             if (Validate::isLoadedObject($address)) {
                 $addresses[] = MlabFactoryApiHelper::serializeAddress($address);

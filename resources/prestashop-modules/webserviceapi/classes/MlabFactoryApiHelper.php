@@ -85,11 +85,15 @@ class MlabFactoryApiHelper
     {
         $plainPassword = (string) $plainPassword;
 
-        if (method_exists('Tools', 'hash')) {
-            return Tools::hash($plainPassword);
+        try {
+            $crypto = \PrestaShop\PrestaShop\Adapter\ServiceLocator::get('\\PrestaShop\\PrestaShop\\Core\\Crypto\\Hashing');
+            return $crypto->hash($plainPassword);
+        } catch (Exception $e) {
+            if (function_exists('password_hash')) {
+                return password_hash($plainPassword, PASSWORD_BCRYPT);
+            }
+            return md5(_COOKIE_KEY_ . $plainPassword);
         }
-
-        return Tools::encrypt($plainPassword);
     }
 
     public static function verifyPassword($plainPassword, $hashedPassword)
@@ -101,18 +105,25 @@ class MlabFactoryApiHelper
             return false;
         }
 
-        if (function_exists('password_verify') && password_verify($plainPassword, $hashedPassword)) {
-            return true;
+        try {
+            $crypto = \PrestaShop\PrestaShop\Adapter\ServiceLocator::get('\\PrestaShop\\PrestaShop\\Core\\Crypto\\Hashing');
+            return $crypto->checkHash($plainPassword, $hashedPassword);
+        } catch (Exception $e) {
+            if (function_exists('password_verify') && password_verify($plainPassword, $hashedPassword)) {
+                return true;
+            }
+            return md5(_COOKIE_KEY_ . $plainPassword) === $hashedPassword;
         }
-
-        return Tools::encrypt($plainPassword) === $hashedPassword;
     }
 
     public static function getCustomerByEmail($email)
     {
-        $customerId = (int) Db::getInstance()->getValue(
-            'SELECT `id_customer` FROM `' . _DB_PREFIX_ . 'customer` WHERE `email` = \'' . pSQL($email) . '\''
-        );
+        $sql = 'SELECT `id_customer` FROM `' . _DB_PREFIX_ . 'customer` 
+                WHERE `email` = \'' . pSQL($email) . '\'
+                AND `is_guest` = 0
+                AND `deleted` = 0';
+        
+        $customerId = (int) Db::getInstance()->getValue($sql);
 
         if ($customerId <= 0) {
             return null;
@@ -402,10 +413,10 @@ class MlabFactoryApiHelper
                 // Update password if provided
                 $plainPassword = trim((string) self::getValue($payload, 'password', ''));
                 if (!empty($plainPassword)) {
-                    $existingCustomer->passwd = Tools::encrypt($plainPassword);
+                    $existingCustomer->passwd = self::hashPassword($plainPassword);
                 } else {
                     $plainPassword = Tools::passwdGen(8);
-                    $existingCustomer->passwd = Tools::encrypt($plainPassword);
+                    $existingCustomer->passwd = self::hashPassword($plainPassword);
                 }
 
                 if ($existingCustomer->update()) {
@@ -472,7 +483,7 @@ class MlabFactoryApiHelper
         if (empty($plainPassword)) {
             $plainPassword = Tools::passwdGen(8);
         }
-        $customer->passwd = Tools::encrypt($plainPassword);
+        $customer->passwd = self::hashPassword($plainPassword);
 
         $customer->is_guest = 0;
         $customer->active = 1;

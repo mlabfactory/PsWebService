@@ -77,6 +77,12 @@ class webserviceapi extends PaymentModule
                 'controller' => 'login',
                 'params' => $params,
             ),
+            'module-webserviceapi-passwordreset' => array(
+                'rule' => 'api/password-reset',
+                'keywords' => array(),
+                'controller' => 'passwordreset',
+                'params' => $params,
+            ),
             'module-webserviceapi-customer' => array(
                 'rule' => 'api/customers',
                 'keywords' => array(),
