@@ -32,8 +32,14 @@ class CachingMiddleware implements MiddlewareInterface
 
         Log::debug("Invoking URL " . $uri . '?' . $queryParams);
 
+        //if param have no_cache=1 skip cache
+        $skipCache = false;
+        if (isset($request->getQueryParams()['no_cache']) && $request->getQueryParams()['no_cache'] == '1') {
+            $skipCache = true;
+        }
+
         // Try to get from cache
-        if (Cache::has($cacheKey)) {
+        if (Cache::has($cacheKey) && $skipCache === false) {
             $cachedData = Cache::get($cacheKey);
             
             if (is_string($cachedData)) {

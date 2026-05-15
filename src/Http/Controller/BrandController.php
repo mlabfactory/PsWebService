@@ -3,25 +3,25 @@ declare(strict_types=1);
 
 namespace PS\Webservice\Http\Controller;
 
-use PS\Webservice\Service\PS\Category;
+use PS\Webservice\Service\PS\Brand;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class CategoryController extends Controller
+class BrandController extends Controller
 {
-    private Category $categoryService;
+    private Brand $brandService;
 
-    public function __construct(Category $categoryService)
+    public function __construct(Brand $brandService)
     {
-        $this->categoryService = $categoryService;
+        $this->brandService = $brandService;
     }
 
-    public function categoryListById(Request $request, Response $response, array $argv): Response
+    public function brandList(Request $request, Response $response, array $argv): Response
     {
-        $categoryId = $argv['id'];
-        $category = $this->categoryService->categoriesList([
+        $id = $argv['id'];
+        $category = $this->brandService->brandsList([
             'display' => 'full',
-            'filter[id]' => $categoryId
+            'filter[id]' => $id
         ]);;
 
         if (is_null($category)) {
@@ -33,7 +33,7 @@ class CategoryController extends Controller
 
     public function categoryList(Request $request, Response $response): Response
     {
-        $categories = $this->categoryService->categoriesList([
+        $categories = $this->brandService->categoriesList([
             'display' => 'full'
         ]);
 

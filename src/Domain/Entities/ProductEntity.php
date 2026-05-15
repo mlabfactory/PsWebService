@@ -18,6 +18,8 @@ class ProductEntity implements ObjectInterface
     private array $data;
     private PrestashopServiceInterface $service;
 
+    private static $filters = [];
+
     private function __construct(array $data, PrestashopServiceInterface $service)
     {
         $this->service = $service;
@@ -77,14 +79,25 @@ class ProductEntity implements ObjectInterface
 
     public function normalizeData(): void
     {
-        unset($this->data['associations']['product_option_values']);
-        $this->data['url'] = isset($this->data['url']) ? str_replace('https://www.dolcezampa.com', '', $this->data['url']) : null; //FIXME: remove these on production
-        $this->buildImageLink([ImageTail::ORIGINAL]);
-        $this->buildCombinations();
-        $this->buildProductFeatures();
-        $this->buildAccessories();
-        $this->buildCategories();
-        $this->buildStockAvailables();
+        if(!empty($this->data['filters'])) {
+           foreach($this->data as $key => $value) {
+                if(in_array($key, $this->filters)) {
+                    $this->data[$key] = $value;
+                } else {
+                    unset($this->data[$key]);
+                }
+           }
+        } else {
+            unset($this->data['associations']['product_option_values']);
+            $this->data['url'] = isset($this->data['url']) ? str_replace('https://www.dolcezampa.com', '', $this->data['url']) : null; //FIXME: remove these on production
+            // $this->buildImageLink([ImageTail::ORIGINAL]); //FIXME: possiamo rimuovere l'immagine verrà creata tramite FRONTEND
+            $this->buildCombinations();
+            $this->buildProductFeatures();
+            $this->buildAccessories();
+            $this->buildCategories();
+            $this->buildStockAvailables();
+        }
+
     }
 
 	public function generatePayload(): \PS\Webservice\Domain\Object\PayloadServiceData

@@ -58,7 +58,7 @@ class CartController extends Controller {
         $cartId = $argv['cartId'];
         $isGuest = (bool) $payload['isGuest'] ?? false;
         $customerId = $payload['customerId'];
-        $operation = $payload['op'];
+        $operation = isset( $payload['op']) ? (string) $payload['op'] : 'up';
 
         if (!is_array($payload)) {
             throw new \InvalidArgumentException('Invalid payload format', 400);

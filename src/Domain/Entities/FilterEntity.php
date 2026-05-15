@@ -23,9 +23,9 @@ class FilterEntity implements ObjectInterface
 
     public static function create(array $data, PrestashopServiceInterface $service): self
     {
-        if (!empty(array_diff(self::MUST_HAVE_KEYS, array_keys($data)))) {
-            throw new \InvalidArgumentException('Missing required keys: ' . implode(', ', array_diff(self::MUST_HAVE_KEYS, array_keys($data))));
-        }
+        // if (!empty(array_diff(self::MUST_HAVE_KEYS, array_keys($data)))) {
+        //     throw new \InvalidArgumentException('Missing required keys: ' . implode(', ', array_diff(self::MUST_HAVE_KEYS, array_keys($data))));
+        // }
 
         return new self($data, $service);
     }
@@ -51,13 +51,16 @@ class FilterEntity implements ObjectInterface
 
     public function normalizeData(): void
     {
+        $attributes = isset($this->data['attributes']) ? $this->data['attributes'] : [];
+        $features = isset($this->data['features']) ? $this->data['features'] : [];
+
         $this->data = [
             'features' => [
-                'materials' => $this->normalizeFeatureValues($this->data['features'], 'Materiale'),
+                'materials' => $this->normalizeFeatureValues($features, 'Materiale'),
             ],
             'attributes' => [
-                'colors' => $this->normalizeAttributeValues($this->data['attributes'], 'Colore'),
-                'sizes' => $this->normalizeAttributeValues($this->data['attributes'], 'Taglia'),
+                'colors' => $this->normalizeAttributeValues($attributes, 'Colore'),
+                'sizes' => $this->normalizeAttributeValues($attributes, 'Taglia'),
             ],
             'price_range' => [
                 'min' => (float) ($this->data['price_range']['min'] ?? 0),
@@ -79,6 +82,11 @@ class FilterEntity implements ObjectInterface
     {
         $materials = [];
         $object = [];
+
+        if(empty($feature)) {
+            return [];
+        }
+
         foreach ($feature as $key => $data) {
             if ($data['name'] == $type) {
                 $object = $feature[$key];
@@ -101,6 +109,10 @@ class FilterEntity implements ObjectInterface
 
     private function normalizeAttributeValues(array $attribute, string $type): array
     {
+        if(empty($attribute)) {
+            return [];
+        }
+        
         $typeAttribute = [];
         $object = [];
         foreach ($attribute as $key => $data) {

@@ -54,7 +54,7 @@ class Cart extends Carrier implements PrestashopServiceInterface {
 
         } catch (\Exception $e) {
             Log::error("Exception occurred while retrieving cart with id {$cartId}" . $e->getMessage());
-            return null;
+            throw new PrestashopConnectorException($this->httpService, $e);
         }
 
         return CartEntity::create($cartresult['data']['cart'], $this);
@@ -68,7 +68,8 @@ class Cart extends Carrier implements PrestashopServiceInterface {
         $products = [
             'id_product' => (int) $cartOptions['productId'],
             'id_product_attribute' => (int) $cartOptions['productAttributeId'],
-            'quantity' => (int) $cartOptions['qty'] ?? 1
+            'quantity' => (int) $cartOptions['qty'] ?? 1,
+            'op' => 'up'
         ];
         $cartOptions['products'] = [$products];
         $payload = CartEntity::create($cartOptions, $this);
@@ -129,7 +130,7 @@ class Cart extends Carrier implements PrestashopServiceInterface {
      * @param string $customerId
      * @return HttpServiceInterface
      */
-    public function updateCart(array $product, string $cartId, string $customerId, bool $isGuest = false, string $op = 'up'): HttpServiceInterface
+    public function updateCart(array $product, string $cartId, string $customerId, bool $isGuest = false, ?string $op = 'up'): HttpServiceInterface
     {
         $type = $isGuest ? 'guest' : 'customer';
         $customerId = $this->decodeId($customerId, $type);

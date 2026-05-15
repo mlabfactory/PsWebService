@@ -47,6 +47,11 @@ $container->set(\PS\Webservice\Service\PS\Order::class, function ($c) {
     return new \PS\Webservice\Service\PS\Order($httpService);
 });
 
+$container->set(\PS\Webservice\Service\PS\Brand::class, function ($c) {
+    $httpService = $c->get(\PS\Webservice\Service\HttpService::class);
+    return new \PS\Webservice\Service\PS\Brand($httpService);
+});
+
 $container->set(\PS\Webservice\Service\PS\Carrier::class, function ($c) {
     $httpService = $c->get(\PS\Webservice\Service\HttpService::class);
     return new \PS\Webservice\Service\PS\Carrier($httpService);
@@ -61,6 +66,11 @@ $container->set(\PS\Webservice\Http\Controller\ProductController::class, functio
 $container->set(\PS\Webservice\Http\Controller\CategoryController::class, function ($c) {
     $categoryService = $c->get(\PS\Webservice\Service\PS\Category::class);
     return new \PS\Webservice\Http\Controller\CategoryController($categoryService);
+});
+
+$container->set(\PS\Webservice\Http\Controller\BrandController::class, function ($c) {
+    $categoryService = $c->get(\PS\Webservice\Service\PS\Brand::class);
+    return new \PS\Webservice\Http\Controller\BrandController($categoryService);
 });
 
 $container->set(\PS\Webservice\Http\Controller\CustomerController::class, function ($c) {

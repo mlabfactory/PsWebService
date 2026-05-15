@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PS\Webservice\Http\Controller;
 
+use PS\Webservice\Domain\Object\Filter;
 use PS\Webservice\Http\Controller\Controller;
 use PS\Webservice\Service\PS\Product;
 use PS\Webservice\Traits\PaginationTrait;
@@ -43,7 +44,7 @@ class ProductController extends Controller
     public function featuredProducts(Request $request, Response $response)
     {
         $featuredProducts = $this->productService->getFeaturedProducts();
-        
+
 
         return response([
             'success' => true,
@@ -59,38 +60,68 @@ class ProductController extends Controller
      */
     public function productByCategory(Request $request, Response $response)
     {
-        $category = $request->getQueryParams()['category'] ?? null;
+        $queryParams = $request->getQueryParams();
 
-        if (!$category) {
+        $category = $queryParams['category'] ?? null;
+        $manufacturer = $queryParams['manufacturer'] ?? null;
+        $filters = $queryParams['filters'] ?? [];
+
+        if (!$category && !$manufacturer) {
             return response([
                 'success' => false,
-                'message' => 'Category query parameter is required'
+                'message' => 'Category or Manufacturer query parameter is required'
             ], 400);
         }
 
-        $pagination = $this->getPaginationParams($request->getQueryParams());
-        $categoryId = (int) $category;
-        
-        $totalProducts = $this->productService->countProducts(['filter[id_category_default]' => $categoryId]);
-        $productsByCategory = $this->productService->getProductByCategory($categoryId, [
+        $pagination = $this->getPaginationParams($queryParams);
+        $paginationOptions = [
             'limit' => $pagination['per_page'],
-            'page' => $pagination['page']
-        ]);
-        
-        $response = $this->paginatedResponse(
-            $productsByCategory->toArray(),
+            'page' => $pagination['page'],
+        ];
+        $filter = new Filter($filters);
+
+        [$products, $countParam] = $this->resolveProductsAndCountParam(
+            $category,
+            $manufacturer,
+            $paginationOptions,
+            $filter
+        );
+
+        $totalProducts = $this->productService->countProducts($countParam);
+        $paginatedData = $this->paginatedResponse(
+            $products->toArray(),
             $pagination['page'],
             $pagination['per_page'],
             $totalProducts
         );
 
-        // build filers
-        $response['filters'] = $this->productService->buildFiltersProducts($categoryId)->toArray();
+        $firstCategory = (int) (explode('|', $category ?? '')[0] ?? 0);
+        $paginatedData['filters'] = $this->productService->buildFiltersProducts($firstCategory)?->toArray();
+
         return response([
-            'products' => $response['data'],
-            'pagination' => $response['pagination'],
-            'filters' => $response['filters']
+            'products' => $paginatedData['data'],
+            'pagination' => $paginatedData['pagination'],
+            'filters' => $paginatedData['filters'],
         ]);
+    }
+
+    private function resolveProductsAndCountParam(
+        ?string $category,
+        ?string $manufacturer,
+        array $paginationOptions,
+        Filter $filter
+    ): array {
+        if ($category !== null) {
+            return [
+                $this->productService->getProductByCategory($category, $paginationOptions, $filter),
+                ['filter[id_category_default]' => "[$category]"],
+            ];
+        }
+
+        return [
+            $this->productService->getProductByManufacture($manufacturer, $paginationOptions, $filter),
+            ['filter[id_manufacturer]' => "[$manufacturer]"],
+        ];
     }
 
     public function productDetail(Request $request, Response $response, array $args)
@@ -129,5 +160,19 @@ class ProductController extends Controller
             'success' => true,
             'data' => []
         ]);
+    }
+
+    public function searchProducts(Request $request, Response $response)
+    {
+        $query = $request->getQueryParams()['q'] ?? null;
+        if (!$query) {
+            return response([
+                'success' => false,
+                'message' => 'Search query parameter "q" is required'
+            ], 400);
+        }
+
+        $searchResults = $this->productService->searchProducts($query);
+        return response($searchResults->toArray());
     }
 }

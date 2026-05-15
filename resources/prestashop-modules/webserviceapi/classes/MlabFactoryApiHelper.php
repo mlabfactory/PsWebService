@@ -24,7 +24,7 @@ class MlabFactoryApiHelper
             return $data[$key];
         }
 
-        if(is_null($default)) {
+        if (is_null($default)) {
             throw new MlabFactoryApiException('Missing required field: ' . $key, 422);
         }
 
@@ -201,12 +201,45 @@ class MlabFactoryApiHelper
         );
     }
 
+    private static function getCoverImage($product): int
+    {
+        $idImage = 0;
+        $idProduct = (int) $product['id_product'];
+        $idProductAttribute = (int) $product['id_product_attribute'];
+
+        if ($idProductAttribute > 0) {
+            // Query diretta alla tabella product_attribute_image
+                    $sql = 'SELECT `id_image` 
+                FROM `' . _DB_PREFIX_ . 'product_attribute_image` 
+                WHERE `id_product_attribute` = ' . (int) $idProductAttribute;
+        
+                $images = Db::getInstance()->executeS($sql);
+                
+                // Prendi la prima immagine se esiste
+                if (!empty($images) && isset($images[0]['id_image'])) {
+                    $idImage = (int) $images[0]['id_image'];
+                }
+        }
+
+        // Fallback all'immagine di copertina
+        if ($idImage == 0) {
+            $cover = Product::getCover($idProduct);
+            $idImage = (int) ($cover['id_image'] ?? 0);
+        }
+
+        return $idImage;
+    }
+
     public static function serializeCart(Cart $cart)
     {
         $products = array();
         foreach ($cart->getProducts() as $product) {
+
+            //get image id
+            $idImage = self::getCoverImage($product);
             $products[] = array(
                 'id_product' => (int) $product['id_product'],
+                'id_image' => $idImage,
                 'id_product_attribute' => (int) $product['id_product_attribute'],
                 'id_customization' => (int) $product['id_customization'],
                 'name' => (string) $product['name'],
@@ -350,22 +383,22 @@ class MlabFactoryApiHelper
 
         // Check if customer already exists with this email
         $existingCustomerId = (int) Customer::customerExists($email, true);
-        
+
         if ($existingCustomerId > 0) {
             // Customer already exists - use existing customer
             $existingCustomer = new Customer($existingCustomerId);
-            
+
             if (!Validate::isLoadedObject($existingCustomer)) {
                 throw new MlabFactoryApiException('Customer found but cannot be loaded.', 500, array('id_customer' => $existingCustomerId));
             }
-            
+
             // If customer was a guest and wants to upgrade to registered, update it
             $shouldRegister = self::toBool(self::getValue($payload, 'create_account', false));
             if ($existingCustomer->is_guest && $shouldRegister) {
                 $existingCustomer->is_guest = 0;
                 $existingCustomer->active = 1;
                 $existingCustomer->id_default_group = (int) Configuration::get('PS_CUSTOMER_GROUP');
-                
+
                 // Update password if provided
                 $plainPassword = trim((string) self::getValue($payload, 'password', ''));
                 if (!empty($plainPassword)) {
@@ -374,7 +407,7 @@ class MlabFactoryApiHelper
                     $plainPassword = Tools::passwdGen(8);
                     $existingCustomer->passwd = Tools::encrypt($plainPassword);
                 }
-                
+
                 if ($existingCustomer->update()) {
                     // Send welcome email for the upgrade
                     Mail::Send(
@@ -392,13 +425,13 @@ class MlabFactoryApiHelper
                     );
                 }
             }
-            
+
             return $existingCustomer;
         }
 
         // Customer doesn't exist - create new one
         $shouldRegister = self::toBool(self::getValue($payload, 'create_account', false));
-        
+
         if (!$shouldRegister) {
             // Guest checkout - create temporary customer
             $customer = new Customer();
@@ -408,7 +441,7 @@ class MlabFactoryApiHelper
             $customer->passwd = md5(pSQL(_COOKIE_KEY_ . time()));
             $customer->is_guest = 1;
             $customer->id_default_group = (int) Configuration::get('PS_GUEST_GROUP');
-            
+
             if (!$customer->validateFields(false) || !$customer->add()) {
                 throw new MlabFactoryApiException('Unable to create guest customer.', 500);
             }
@@ -433,14 +466,14 @@ class MlabFactoryApiHelper
             $invoiceAddress = self::ensureAddressForCustomer($customer, $payload['invoice_address']);
             $customer->id_address_invoice = (int) $invoiceAddress->id;
         }
-        
+
         // Generate password if provided, otherwise random
         $plainPassword = trim((string) self::getValue($payload, 'password', ''));
         if (empty($plainPassword)) {
             $plainPassword = Tools::passwdGen(8);
         }
         $customer->passwd = Tools::encrypt($plainPassword);
-        
+
         $customer->is_guest = 0;
         $customer->active = 1;
         $customer->id_default_group = (int) Configuration::get('PS_CUSTOMER_GROUP');
@@ -452,19 +485,21 @@ class MlabFactoryApiHelper
         }
 
         // Send welcome email if configured
-        if (!Mail::Send(
-            (int) Configuration::get('PS_LANG_DEFAULT'),
-            'account',
-            Mail::l('Welcome!'),
-            array(
-                '{firstname}' => $customer->firstname,
-                '{lastname}' => $customer->lastname,
-                '{email}' => $customer->email,
-                '{passwd}' => $plainPassword
-            ),
-            $customer->email,
-            $customer->firstname . ' ' . $customer->lastname
-        )) {
+        if (
+            !Mail::Send(
+                (int) Configuration::get('PS_LANG_DEFAULT'),
+                'account',
+                Mail::l('Welcome!'),
+                array(
+                    '{firstname}' => $customer->firstname,
+                    '{lastname}' => $customer->lastname,
+                    '{email}' => $customer->email,
+                    '{passwd}' => $plainPassword
+                ),
+                $customer->email,
+                $customer->firstname . ' ' . $customer->lastname
+            )
+        ) {
             // Email send failure is not critical, just log it
             PrestaShopLogger::addLog('Unable to send welcome email to: ' . $customer->email, 2);
         }

@@ -11,18 +11,21 @@ final class Filter
 
     private array $data;
 
-    const ALLOWED_FILTER = ['features', 'attributes', 'price_range', 'manufacturers'];
+    const ALLOWED_FILTER = ['colors', 'id_attribute', 'id_default_combination', 'id_supplier', 'id', 'id_manufacturer', 'id_category_default','price','customizable'];
 
     public function __construct(array $data)
     {
         $this->data = $data;
-        $this->normalizeData();
+        $this->validate();
     }
 
-    public function normalizeData(array $toDecode = []): void
+    public function validate(array $toDecode = []): void
     {
-        foreach($this->data as $k => $value) {
-            $this->addFilter($k, $value);
+        // check if filter is allowed
+        foreach ($this->data as $filterKey => $filterValue) {
+            if (!in_array($filterKey, self::ALLOWED_FILTER, true)) {
+                throw new \InvalidArgumentException("Filter '{$filterKey}' is not allowed.");
+            }
         }
     }
 
@@ -31,21 +34,22 @@ final class Filter
         return $this->data[$name];
     }
 
-    public function toArray(): array
+    public function match(array $productData): bool
     {
-        return $this->data;
-    }
-
-    private function addFilter(string $key, mixed $value): void
-    {
-        switch ($key) {
-            case 'colors':
-            case 'color':
-                $this->data['attributes'][] = $value;
-                break;
-            default:
-                break;
+        if(empty($this->data)) {
+            return false; // No filters to apply, so the product matches by default
         }
+
+        foreach ($this->data as $filterKey => $filterValue) {
+            if (!in_array($filterKey, self::ALLOWED_FILTER, true)) {
+                continue; // Skip unsupported filters
+            }
+
+            if (isset($productData[$filterKey]) && in_array($productData[$filterKey], $filterValue)) {
+                return true; // Product does not match the filter criteria
+            }
+        }
+        return false; // Product matches all filter criteria
     }
 
     

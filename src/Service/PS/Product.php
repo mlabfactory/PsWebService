@@ -10,7 +10,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use PS\Webservice\Domain\Object\Filter;
 
-class Product extends PrestashopService implements PrestashopServiceInterface {
+class Product extends PrestashopService implements PrestashopServiceInterface
+{
 
     public function countProducts(array $filter = []): int
     {
@@ -18,11 +19,16 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
         $this->httpService->setUrl("/products?{$queryString}");
         $response = $this->httpService->invoke('GET');
 
-        if($response->failed()) {
+        if ($response->failed()) {
             throw new PrestashopConnectorException($this->httpService);
         }
 
-        return count($response->toArray()['products']);
+        if(empty($response->toArray())) {
+            return 0; // No products found
+        }
+
+        $products = $response->toArray()['products'] ?? [];
+        return count($products);
     }
 
     /**
@@ -31,9 +37,10 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
      *
      * @return Collection The collection of product entities.
      */
-    public function productsList(array $displayOptions = ['display' => 'full'], ?Filter $filter = null): Collection {
+    public function productsList(array $displayOptions = ['display' => 'full'], ?Filter $filter = null): Collection
+    {
 
-        if(!empty($displayOptions)) {
+        if (!empty($displayOptions)) {
             $queryString = http_build_query($displayOptions);
             $this->httpService->setUrl("/products?{$queryString}");
         } else {
@@ -44,12 +51,16 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
 
         $response = $this->httpService->invoke('GET');
 
-        if($response->failed()) {
+        if ($response->failed()) {
             throw new PrestashopConnectorException($this->httpService);
         }
 
         $collection = new Collection();
-        foreach($response->toArray()['products'] as $productData) {
+        $products = $response->toArray()['products'] ?? [];
+        foreach ($products as $productData) {
+            if(!is_null($filter) && $filter->match($productData)) {
+                continue; // Skip products that do not match the filter criteria
+            }
             $collection->push(ProductEntity::create($productData, $this));
         }
 
@@ -60,24 +71,44 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
      *
      * @return Collection The collection of featured product entities.
      */
-    public function getFeaturedProducts(): Collection {
+    public function getFeaturedProducts(): Collection
+    {
 
-        $products = $this->productsList(['display' => 'full','sort' => 'id_DESC', 'limit' => 4]);
+        $products = $this->productsList(['display' => 'full', 'sort' => 'id_DESC', 'limit' => 4]);
         return $products;
     }
 
-        /**
-         * Retrieves a collection of products belonging to a specific category.
-         *
-         * @param int $categoryId The ID of the category to retrieve products from
-         * @return Collection A collection of products that belong to the specified category
-         */
-        public function getProductByCategory(int $categoryId, array $pagination = [], ?Filter $filters = null): Collection {
-         $limit = $pagination['limit'] ?? 10;
-         $page = $pagination['page'] ?? 1;
-         $offset = ($page - 1) * $limit;
+    /**
+     * Retrieves a collection of products belonging to a specific category.
+     *
+     * @param string $categoryId The ID of the category to retrieve products from
+     * @return Collection A collection of products that belong to the specified category
+     */
+    public function getProductByCategory(string $categoryId, array $pagination = [], ?Filter $filters = null): Collection
+    {
+        $limit = $pagination['limit'] ?? 10;
+        $page = $pagination['page'] ?? 1;
+        $offset = ($page - 1) * $limit;
 
-        $products = $this->productsList(['display' => 'full','sort' => 'id_DESC', 'limit' => "$offset,$limit", 'filter[id_category_default]' => $categoryId, 'filter[active]' => 1]);
+        $products = $this->productsList(['display' => 'full', 'sort' => 'id_DESC', 'limit' => "$offset,$limit", 'filter[id_category_default]' => "[$categoryId]", 'filter[active]' => 1]
+        , $filters);
+        return $products;
+    }
+
+    /**
+     * Retrieves a collection of products belonging to a specific category.
+     *
+     * @param string $categoryId The ID of the category to retrieve products from
+     * @return Collection A collection of products that belong to the specified category
+     */
+    public function getProductByManufacture(string $manufactureId, array $pagination = [], ?Filter $filters = null): Collection
+    {
+        $limit = $pagination['limit'] ?? 10;
+        $page = $pagination['page'] ?? 1;
+        $offset = ($page - 1) * $limit;
+
+        $products = $this->productsList(['display' => 'full', 'sort' => 'id_DESC', 'limit' => "$offset,$limit", 'filter[id_manufacturer]' => "[$manufactureId]", 'filter[active]' => 1]
+        , $filters);
         return $products;
     }
 
@@ -89,7 +120,8 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
      * @return ProductEntity|null The product entity containing detailed information,
      *                            or null if the product is not found
      */
-    public function getProductDetail(string $slug): ?ProductEntity {
+    public function getProductDetail(string $slug): ?ProductEntity
+    {
 
         //first we nee to get the product id from the slug, then we can get the product detail with the id
         $productId = $this->findProductIdBySlug($slug);
@@ -100,7 +132,7 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
         $this->httpService->setUrl("/products/{$productId}?display=full");
         $response = $this->httpService->invoke('GET');
 
-        if($response->failed()) {
+        if ($response->failed()) {
             if ($response->getHttpCode() === 404) {
                 return null; // Product not found
             }
@@ -117,11 +149,11 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
         $this->httpService->setUrl("/filters?id_category={$categoryId}&ws_key={$this->httpService->getConfig()->apikey}");
         $response = $this->httpService->invoke('GET');
 
-        if($response->failed()) {
-            throw new \RuntimeException("Failed to retrieve products for filters: " . $response->getHttpCode());
+        if ($response->failed()) {
+            return null; // Failed to retrieve filters for the category
         }
 
-        if(empty($response->toArray()['data']['filters'])) {
+        if (empty($response->toArray()['data']['filters'])) {
             Log::warning("No filters found for category ID {$categoryId}");
             return null; // No filters found for the category
         }
@@ -136,7 +168,7 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
         $this->httpService->setUrl("/catalog?by_slug={$slug}");
         $response = $this->httpService->invoke('GET');
 
-        if($response->failed()) {
+        if ($response->failed()) {
             throw new PrestashopConnectorException($this->httpService);
         }
 
@@ -146,5 +178,24 @@ class Product extends PrestashopService implements PrestashopServiceInterface {
         }
 
         return (int) $products['id_product'];
+    }
+
+    public function searchProducts(string $query): Collection
+    {
+        $this->httpService->setUrl("/search?query={$query}&language=1&display=full");
+        $response = $this->httpService->invoke('GET');
+
+        if ($response->failed()) {
+            throw new PrestashopConnectorException($this->httpService);
+        }
+
+        $collection = new Collection();
+        $products = $response->toArray()['products'] ?? [];
+        foreach ($products as $productData) {
+            $productData['filters'] = ['id','name','id_default_image','price', 'url'];
+            $collection->push(ProductEntity::create($productData, $this));
+        }
+
+        return $collection;
     }
 }
