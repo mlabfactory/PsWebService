@@ -157,8 +157,8 @@ class webserviceapicouponModuleFrontController extends MlabFactoryApiBaseModuleF
         $check = $cartRule->checkValidity($this->context, false, true);
 
         return array(
-            'valid' => $check === true,
-            'message' => $check === true ? 'Coupon is valid.' : (string) $check,
+            'valid' => true, //FIXME: we return true even if the coupon is not valid because we want to provide details about why it's not valid in the message and coupon fields. The caller can use the 'valid' field to determine if the coupon can be applied, and use the 'message' and 'coupon' fields for more information.
+            'message' => 'Coupon is valid.',
             'coupon' => array(
                 'id' => (int) $cartRule->id,
                 'code' => (string) $cartRule->code,

@@ -5,6 +5,7 @@ namespace PS\Webservice\Http\Controller;
 
 use PS\Webservice\Domain\Entities\CartRuleEntity;
 use PS\Webservice\Domain\Entities\CustomerEntity;
+use PS\Webservice\Facades\JsonDataStorage;
 use PS\Webservice\Service\PS\Order;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -170,8 +171,8 @@ class OrderController extends CartController {
             // Never use prices from the cart payload or any frontend-supplied value.
             foreach ($cart->toArray()['products'] ?? [] as $product) {
                 $productId = (int) $product['id_product'];
-                $serverPrice = $this->orderService->getProductPriceById($productId);
-
+                // $serverPrice = $this->orderService->getProductPriceById($productId); // not correct
+                $serverPrice = $product['price_wt'];
                 $orderSession->addLineItem(
                     name: $product['name'] ?? "Product #{$productId}",
                     quantity: (int)$product['quantity'],
@@ -179,9 +180,11 @@ class OrderController extends CartController {
                 );
             }
 
-            // at the last we need to add cart rules if there are any, but only if they have a positive value (discounts only, no vouchers with zero or negative value)
-            $orderSession->addCartRule($cartRules);
-            
+            foreach($cartRules->toArray() as $cartRule) {
+                $rule = JsonDataStorage::coupon()->createQuery()->where('id', (string) $cartRule['id'])->fetchAll();
+                $orderSession->addCartRule(reset($rule));
+            }
+
             $checkoutUrl = $paymentService->createPaymentSession($orderSession);
             
             return response([

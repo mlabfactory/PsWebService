@@ -129,7 +129,7 @@ class CartController extends Controller {
         }
 
         $isValid = $this->cartService->validateCoupon($code, $cartId, $customerId, $guestId);
-        return response(['valid' => $isValid]);
+        return response($isValid);
     }
 
     public function getCartRules(Request $request, Response $response, array $argv): Response

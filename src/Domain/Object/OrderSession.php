@@ -6,7 +6,9 @@ namespace PS\Webservice\Domain\Object;
 use PS\Webservice\Domain\Entities\CarrierEntity;
 use PS\Webservice\Domain\Entities\CartRuleEntity;
 use PS\Webservice\Domain\Entities\CustomerEntity;
+use PS\Webservice\Domain\Models\CouponStorage;
 use PS\Webservice\Domain\ObjectInterface;
+use PS\Webservice\Facades\JsonDataStorage;
 use PS\Webservice\Service\PS\PrestashopServiceInterface;
 use PS\Webservice\Traits\UuidGenerator;
 
@@ -98,13 +100,10 @@ class OrderSession implements ObjectInterface
         ];
     }
 
-    public function addCartRule(CartRuleEntity $cartRule): void
+    public function addCartRule(array $cartRule): void
     {
         /** @var Rule $rule */
-        foreach($cartRule as $rule) {
-            $id = $rule->stripe_id;
-            $this->data['discounts']['coupon'] = $id; //FIXME: we need to create a coupon in Stripe for this cart rule and use its ID here
-        }
+        $this->data['discount']['coupon'] = $cartRule['id_relative']; //FIXME: we need to create a coupon in Stripe for this cart rule and use its ID here
     }
 
     public function addCarrier(CarrierEntity $carrier): void

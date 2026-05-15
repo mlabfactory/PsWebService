@@ -238,7 +238,7 @@ class Cart extends Carrier implements PrestashopServiceInterface {
         return null;
     }
 
-    public function validateCoupon(string $code, string $cartId, ?string $customerId = null, ?string $guestId = null): bool
+    public function validateCoupon(string $code, string $cartId, ?string $customerId = null, ?string $guestId = null): array|false
     {
         $query = [
             'code' => $code,
@@ -266,7 +266,7 @@ class Cart extends Carrier implements PrestashopServiceInterface {
             return false;
         }
 
-        return (bool) ($data['valid'] ?? false);
+        return $data;
     }
 
     /**
