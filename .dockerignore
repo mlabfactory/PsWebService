@@ -4,3 +4,5 @@ docs/*
 Test/*
 php/*
 docker-compose.*
+storage/cache/*
+vendor/*
