@@ -1,16 +1,52 @@
 version: '2.2'
 
 services:
-    bemodule:
-      container_name: dolcezampa_webservice
-      image: ghcr.io/dolce-zampa/webservice:v1-alpha
-      networks:
-        - dolcezampa
-      restart: unless-stopped
-      ports:
-        - "8787:80"
+  nextjs-app:
+    image: ghcr.io/dolce-zampa/storefront:v1-alpha
+    container_name: dolcezampa_storefront
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - dolcezampa_default
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Ora questo punterà internamente grazie all'alias
+      NEXT_PUBLIC_API_URL: "http://demo.dolcezampa.com"
+      NEXT_PUBLIC_API_KEY: "${NEXT_PUBLIC_API_KEY:-}"
+      NEXT_PUBLIC_PRESTASHOP_TOKEN: "${NEXT_PUBLIC_PRESTASHOP_TOKEN:-}"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  webservice:
+    container_name: dolcezampa_webservice
+    image: ghcr.io/dolce-zampa/webservice:v1-alpha
+    networks:
+      dolcezampa_default:
+        aliases:
+          - demo.dolcezampa.com
+    restart: unless-stopped
+    ports:
+      - "8787:80"
+  
+  cache:
+    image: redis:alpine
+    container_name: dolcezampa_rediscache
+    restart: unless-stopped
+    networks:
+      - dolcezampa_default
 
 networks:
-  dolcezampa:
+  dolcezampa_default:
     external: true
     name: dolcezampa_default
+    

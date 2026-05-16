@@ -5,6 +5,10 @@ use Illuminate\Support\Facades\Facade;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+\Sentry\init([
+  'dsn' => 'https://ef5aad4b4761f3298bb76380951a20c3@o4511381519204352.ingest.de.sentry.io/4511394505097296',
+]);
+
 // Set up your application configuration
 // Initialize slim application
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');

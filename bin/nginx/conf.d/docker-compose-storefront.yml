@@ -1,0 +1,24 @@
+services:
+  nextjs-app:
+    image: ghcr.io/dolce-zampa/storefront:v1-alpha
+    container_name: dolcezampa_storefront
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - dolcezampa_default
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  dolcezampa_default:
+    external: true
