@@ -79,11 +79,13 @@ class ProductController extends Controller
             'page' => $pagination['page'],
         ];
         $filter = new Filter($filters);
+        $sort = $queryParams['sort_by'] ?? 'id_DESC';
 
         [$products, $countParam] = $this->resolveProductsAndCountParam(
             $category,
             $manufacturer,
             $paginationOptions,
+            $sort,
             $filter
         );
 
@@ -109,17 +111,18 @@ class ProductController extends Controller
         ?string $category,
         ?string $manufacturer,
         array $paginationOptions,
+        string $sort = 'id_DESC',
         Filter $filter
     ): array {
         if ($category !== null) {
             return [
-                $this->productService->getProductByCategory($category, $paginationOptions, $filter),
+                $this->productService->getProductByCategory($category, $paginationOptions, $sort, $filter),
                 ['filter[id_category_default]' => "[$category]"],
             ];
         }
 
         return [
-            $this->productService->getProductByManufacture($manufacturer, $paginationOptions, $filter),
+            $this->productService->getProductByManufacture($manufacturer, $paginationOptions, $sort, $filter),
             ['filter[id_manufacturer]' => "[$manufacturer]"],
         ];
     }

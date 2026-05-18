@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a07332452c8e58c0c2bd879bfab2c330",
+    "content-hash": "db10bc0560e52811026506b897df0558",
     "packages": [
         {
             "name": "bref/bref",
@@ -2337,16 +2337,16 @@
         },
         {
             "name": "mdf/json-database-storage",
-            "version": "0-alpha",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/marcodefelice/JsonDatabase-storage.git",
-                "reference": "91781c745e5dcbfb014b298bb18d5cb8923079bc"
+                "reference": "74a4a82e0eadecdadb827eeffe784f48556da444"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marcodefelice/JsonDatabase-storage/zipball/91781c745e5dcbfb014b298bb18d5cb8923079bc",
-                "reference": "91781c745e5dcbfb014b298bb18d5cb8923079bc",
+                "url": "https://api.github.com/repos/marcodefelice/JsonDatabase-storage/zipball/74a4a82e0eadecdadb827eeffe784f48556da444",
+                "reference": "74a4a82e0eadecdadb827eeffe784f48556da444",
                 "shasum": ""
             },
             "require": {
@@ -2368,10 +2368,10 @@
             ],
             "description": "Json database storage with PHP",
             "support": {
-                "source": "https://github.com/marcodefelice/JsonDatabase-storage/tree/0-alpha",
+                "source": "https://github.com/marcodefelice/JsonDatabase-storage/tree/v1.0.0",
                 "issues": "https://github.com/marcodefelice/JsonDatabase-storage/issues"
             },
-            "time": "2024-06-04T17:47:00+00:00"
+            "time": "2026-05-12T09:43:38+00:00"
         },
         {
             "name": "monolog/monolog",

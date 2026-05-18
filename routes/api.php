@@ -41,12 +41,16 @@ $app->post('/api/order/confirm', PS\Webservice\Http\Controller\OrderController::
 $app->post('/api/webhooks/stripe/checkout', PS\Webservice\Http\Controller\StripeWebhookController::class . ':handleWebhook');
 
 /** Carriers api */
-$app->get('/api/carriers', PS\Webservice\Http\Controller\CarrierController::class . ':carrierList');//->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware(3600));
+$app->get('/api/carriers', PS\Webservice\Http\Controller\CarrierController::class . ':carrierList')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
 $app->get('/api/carriers/available', PS\Webservice\Http\Controller\CarrierController::class . ':availableCarriers');
-$app->get('/api/carriers/{id}', PS\Webservice\Http\Controller\CarrierController::class . ':getCarrier')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware(3600));
+$app->get('/api/carriers/{id}', PS\Webservice\Http\Controller\CarrierController::class . ':getCarrier')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
 
 /** Configuration service API */
 $app->post('/api/config/cart_rules', PS\Webservice\Http\Controller\ConfigController::class . ':makeCartRulesConfig');
 
 /** search */
 $app->get('/api/search', PS\Webservice\Http\Controller\ProductController::class . ':searchProducts')->addMiddleware(new \PS\Webservice\Http\Middleware\CachingMiddleware());
+
+/** CMS */
+$app->get('/api/cms', PS\Webservice\Http\Controller\CmsController::class . ':cmsList');
+$app->get('/api/cms/{id}', PS\Webservice\Http\Controller\CmsController::class . ':cmsDetail');

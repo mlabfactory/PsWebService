@@ -84,13 +84,13 @@ class Product extends PrestashopService implements PrestashopServiceInterface
      * @param string $categoryId The ID of the category to retrieve products from
      * @return Collection A collection of products that belong to the specified category
      */
-    public function getProductByCategory(string $categoryId, array $pagination = [], ?Filter $filters = null): Collection
+    public function getProductByCategory(string $categoryId, array $pagination = [], string $sort = 'id_DESC', ?Filter $filters = null): Collection
     {
         $limit = $pagination['limit'] ?? 10;
         $page = $pagination['page'] ?? 1;
         $offset = ($page - 1) * $limit;
 
-        $products = $this->productsList(['display' => 'full', 'sort' => 'id_DESC', 'limit' => "$offset,$limit", 'filter[id_category_default]' => "[$categoryId]", 'filter[active]' => 1]
+        $products = $this->productsList(['display' => 'full', 'sort' => $sort, 'limit' => "$offset,$limit", 'filter[id_category_default]' => "[$categoryId]", 'filter[active]' => 1]
         , $filters);
         return $products;
     }
@@ -101,13 +101,13 @@ class Product extends PrestashopService implements PrestashopServiceInterface
      * @param string $categoryId The ID of the category to retrieve products from
      * @return Collection A collection of products that belong to the specified category
      */
-    public function getProductByManufacture(string $manufactureId, array $pagination = [], ?Filter $filters = null): Collection
+    public function getProductByManufacture(string $manufactureId, array $pagination = [], string $sort = 'id_DESC', ?Filter $filters = null): Collection
     {
         $limit = $pagination['limit'] ?? 10;
         $page = $pagination['page'] ?? 1;
         $offset = ($page - 1) * $limit;
 
-        $products = $this->productsList(['display' => 'full', 'sort' => 'id_DESC', 'limit' => "$offset,$limit", 'filter[id_manufacturer]' => "[$manufactureId]", 'filter[active]' => 1]
+        $products = $this->productsList(['display' => 'full', 'sort' => $sort, 'limit' => "$offset,$limit", 'filter[id_manufacturer]' => "[$manufactureId]", 'filter[active]' => 1]
         , $filters);
         return $products;
     }

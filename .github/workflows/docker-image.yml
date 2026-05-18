@@ -1,0 +1,49 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.TOKEN }}
+    
+    - name: Build the Docker image
+      run: |
+        docker build . --file Dockerfile --tag ghcr.io/dolce-zampa/webservice:latest
+    
+    - name: Push the Docker image
+      run: |
+        docker push ghcr.io/dolce-zampa/webservice:latest
+
+  deploy:
+      needs: build
+      runs-on: ubuntu-latest
+      environment: prod
+      steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.TOKEN }}
+            docker pull ghcr.io/dolce-zampa/webservice:latest
+            docker stop dolcezampa_webservice || true
+            docker rm dolcezampa_webservice || true
+            cd /root/infra && docker-compose up -d --build webservice
