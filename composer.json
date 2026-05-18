@@ -35,8 +35,8 @@
         "illuminate/cache": "^11.51",
         "stripe/stripe-php": "^20.1",
         "hashids/hashids": "^5.0",
-        "mdf/json-database-storage": "v1.0.0",
-        "sentry/sentry": "dev-master"
+        "mdf/json-database-storage": "~v1.0.1",
+        "sentry/sentry": "^4.27"
     },
     "require-dev": {
         "nikic/php-parser": "^5.0",
@@ -57,5 +57,5 @@
             "email": "marco.defelice@mlabfactory.it"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }
