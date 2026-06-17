@@ -218,4 +218,85 @@ class Product extends PrestashopService implements PrestashopServiceInterface
 
         return $products;
     }
-}
+
+    /**
+     * Updates a product's content in PrestaShop via the custom module endpoint.
+     * The product is kept inactive (active=0) unless explicitly set otherwise.
+     *
+     * @param int   $productId The PrestaShop product ID
+     * @param array $data      Fields to update (name, description, description_short, meta_title, meta_description, active)
+     * @return bool True on success
+     * @throws PrestashopConnectorException on failure
+     */
+    public function updateProduct(int $productId, array $data): bool
+    {
+        try {
+            $payload = array_merge(['id' => $productId], $data);
+            $this->httpService->setUrl("/catalog/update?debug=true");
+            $response = $this->httpService->invoke('POST', $payload);
+
+            if ($response->failed()) {
+                throw new PrestashopConnectorException($this->httpService);
+            }
+
+            Log::info("updateProduct: product #{$productId} updated successfully");
+            return true;
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            Log::error("updateProduct: HTTP error for product #{$productId}: " . $e->getMessage());
+            throw new PrestashopConnectorException($this->httpService);
+        }
+    }
+
+    /**
+     * Downloads an image from a URL and uploads it to a PrestaShop product via the
+     * native webservice image endpoint (POST /api/images/products/{id}).
+     *
+     * @param int    $productId The PrestaShop product ID
+     * @param string $imageUrl  A publicly accessible URL of the image to upload
+     * @return bool True on success
+     * @throws PrestashopConnectorException on failure
+     */
+    public function uploadProductImage(int $productId, string $imageUrl): bool
+    {
+        $client = new \GuzzleHttp\Client(['verify' => false, 'timeout' => 60]); // FIXME: enable verify in production
+
+        $tmpFile = null;
+        $namedTmp = null;
+        try {
+            // Download the remote image into a temporary file
+            $tmpFile = tempnam(sys_get_temp_dir(), 'ps_img_');
+            $imageResponse = $client->get($imageUrl, ['sink' => $tmpFile]);
+
+            $contentType = $imageResponse->getHeaderLine('Content-Type') ?: 'image/jpeg';
+            $extension   = str_contains($contentType, 'png') ? 'png' : 'jpg';
+            $namedTmp    = $tmpFile . '.' . $extension;
+            rename($tmpFile, $namedTmp);
+            $tmpFile = null; // file has been renamed; clean up via $namedTmp
+
+            // Upload to PrestaShop via its native image API using header-based auth only
+            $this->httpService->setUrl("/images/products/{$productId}?output_format=JSON");
+            $response = $this->httpService->setMultipartData([
+                            'name'     => 'image',
+                            'contents' => fopen($namedTmp, 'r'),
+                            'filename' => "product_{$productId}.{$extension}",
+                        ])->invoke('POST', []);
+
+            @unlink($namedTmp);
+
+            if ($response->failed()) {
+                throw new PrestashopConnectorException($this->httpService);
+            }
+
+            Log::info("uploadProductImage: image uploaded for product #{$productId}");
+            return true;
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            if ($tmpFile !== null) {
+                @unlink($tmpFile);
+            }
+            if ($namedTmp !== null) {
+                @unlink($namedTmp);
+            }
+            Log::error("uploadProductImage: HTTP error for product #{$productId}: " . $e->getMessage());
+            throw new PrestashopConnectorException($this->httpService);
+        }
+    }}
